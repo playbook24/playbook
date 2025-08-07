@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORB Playbook</title>
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="view-full-court">
+
+    <header class="app-header">
+        <div class="header-content">
+            <div class="header-left">
+                <button id="toggle-playbook-manager-btn" title="Gérer le Playbook">
+                    <svg viewBox="0 0 24 24"><path d="M19 2H5C3.9 2 3 2.9 3 4V20C3 21.1 3.9 22 5 22H19C20.1 22 21 21.1 21 20V4C21 2.9 20.1 2 19 2M17 18H7V16H17V18M17 14H7V12H17V14M17 10H7V8H17V10Z"/></svg>
+                    <span>Playbook</span>
+                </button>
+            </div>
+            <div class="header-center">
+                <h1>ORB <span class="highlight">TACTICAL BOARD</span></h1>
+            </div>
+            <div class="header-right">
+                <button id="theme-toggle-btn" title="Changer le thème">
+                    <svg id="theme-icon-sun" viewBox="0 0 24 24"><path fill="currentColor" d="M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7z M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9z M2,12c0,0.55,0.45,1,1,1h1c0.55,0,1-0.45,1-1s-0.45-1-1-1H3C2.45,11,2,11.45,2,12z M19,11h-1c-0.55,0-1,0.45-1,1s0.45,1,1,1h1c0.55,0,1-0.45,1-1S19.55,11,19,11z M11,19v1c0,0.55,0.45,1,1,1s1-0.45,1-1v-1c0-0.55-0.45-1-1-1S11,18.45,11,19z M11,2v1c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M5.99,4.58c-0.39-0.39-1.02-0.39-1.41,0l-0.71,0.71c-0.39,0.39-0.39,1.02,0,1.41s1.02,0.39,1.41,0l0.71-0.71C6.38,5.61,6.38,4.97,5.99,4.58z M18.36,17.66c-0.39-0.39-1.02-0.39-1.41,0l-0.71,0.71c-0.39,0.39-0.39,1.02,0,1.41s1.02,0.39,1.41,0l0.71-0.71C18.75,18.68,18.75,18.05,18.36,17.66z M17.66,5.99c0.39-0.39,0.39-1.02,0-1.41l-0.71-0.71c-0.39-0.39-1.02-0.39-1.41,0s-0.39,1.02,0,1.41l0.71,0.71C16.63,6.38,17.27,6.38,17.66,5.99z M4.58,18.36c0.39-0.39,0.39-1.02,0-1.41l-0.71-0.71c-0.39-0.39-1.02-0.39-1.41,0s-0.39,1.02,0,1.41l0.71,0.71C3.56,18.75,4.19,18.75,4.58,18.36z"/></svg>
+                    <svg id="theme-icon-moon" class="hidden" viewBox="0 0 24 24"><path fill="currentColor" d="M12.3,4.9C10.9,4.4,9.4,4.5,8.1,5.2c-1.4,0.7-2.5,1.9-3.2,3.4c-0.7,1.5-0.7,3.2-0.1,4.8c0.6,1.6,1.8,2.9,3.3,3.7c1.5,0.8,3.2,0.9,4.7,0.4c1.5-0.5,2.8-1.5,3.6-2.9c0.8-1.4,1.1-3,0.7-4.5c-0.4-1.5-1.3-2.8-2.5-3.8C14,5.2,13.2,5,12.3,4.9z"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="play-manager-container" class="floating-panel section-container hidden">
+        <div id="play-manager">
+            <div class="playbook-group">
+                <label for="play-name-input">Nom du Playbook</label>
+                <input type="text" id="play-name-input" placeholder="Entrez un nom...">
+            </div>
+
+            <div class="playbook-group">
+                <label>Fichier</label>
+                <div class="button-row">
+                    <input type="file" id="import-file-input" class="hidden" accept=".json,application/json">
+                    <button id="load-file-btn" title="Charger un playbook (.json)"><svg viewBox="0 0 24 24"><path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z" /></svg> Charger</button>
+                    <button id="save-file-btn" class="btn-primary" title="Sauvegarder le playbook (.json)"> <svg viewBox="0 0 24 24"><path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" /></svg> Sauvegarder</button>
+                </div>
+            </div>
+
+            <div class="playbook-group">
+                <label>Export</label>
+                <div class="button-row">
+                    <button id="export-pdf-btn" class="btn-primary" title="Exporter en PDF">Exporter (PDF)</button>
+                    <button id="export-video-btn" class="btn-primary" title="Exporter en format vidéo WebM">Exporter (Vidéo)</button>
+                </div>
+                <div class="pdf-options">
+                    <label for="pdf-scenes-per-page">Scènes/page (PDF) :</label>
+                    <input type="number" id="pdf-scenes-per-page" value="1" min="1" max="6">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <aside id="sidebar">
+            <div id="properties-panel" class="section-container">
+                <h2>Propriétés</h2>
+                <div id="prop-content">
+                    <div id="scene-props" class="prop-group hidden">
+                        <div class="prop-row"><label for="scene-name-prop">Nom :</label><input type="text" id="scene-name-prop"></div>
+                        <div class="prop-row"><label for="scene-duration-prop">Durée (s) :</label><input type="number" id="scene-duration-prop" step="0.1" min="0.1" placeholder="auto"></div>
+                        <p class="prop-info">Laissez la durée vide pour un calcul automatique.</p>
+                    </div>
+                    <div id="player-props" class="prop-group hidden">
+                        <div class="prop-row"><label for="player-label-input">Numéro :</label><input type="text" id="player-label-input"></div>
+                        <div class="prop-row"><label for="player-color-input">Couleur :</label><input type="color" id="player-color-input"></div>
+                        <div class="color-palette"></div>
+                    </div>
+                    <div id="defender-props" class="prop-group hidden">
+                        <div class="prop-row"><label for="defender-label-input">Numéro :</label><input type="text" id="defender-label-input"></div>
+                        <div class="prop-row"><label for="defender-color-input">Couleur :</label><input type="color" id="defender-color-input"></div>
+                         <div class="color-palette"></div>
+                        <div class="prop-row"><label for="defender-rotation-input">Rotation :</label><input type="range" id="defender-rotation-input" min="0" max="360" step="1"></div>
+                    </div>
+                    <div id="ball-props" class="prop-group hidden">
+                        <div class="prop-row"><label for="ball-color-input">Couleur :</label><input type="color" id="ball-color-input"></div>
+                    </div>
+                    <div id="cone-props" class="prop-group hidden">
+                        <div class="prop-row"><label for="cone-color-input">Couleur :</label><input type="color" id="cone-color-input"></div>
+                        <div class="color-palette"></div>
+                    </div>
+                    <div id="hoop-props" class="prop-group hidden">
+                        <div class="prop-row"><label for="hoop-color-input">Couleur :</label><input type="color" id="hoop-color-input"></div>
+                        <div class="color-palette"></div>
+                    </div>
+                    <div id="basket-props" class="prop-group hidden">
+                        <div class="prop-row"><label for="basket-color-input">Couleur :</label><input type="color" id="basket-color-input"></div>
+                        <div class="color-palette"></div>
+                    </div>
+                    <div id="zone-props" class="prop-group hidden">
+                        <div class="prop-row"><label for="zone-color-input">Couleur :</label><input type="color" id="zone-color-input"></div>
+                        <div class="color-palette"></div>
+                    </div>
+                    <div id="text-props" class="prop-group hidden">
+                        <div class="prop-row"><label for="text-content-input">Texte :</label><input type="text" id="text-content-input"></div>
+                        <div class="prop-row"><label for="text-color-input">Couleur :</label><input type="color" id="text-color-input"></div>
+                         <div class="color-palette"></div>
+                        <div class="prop-row"><label for="text-size-input">Taille :</label><input type="range" id="text-size-input" min="8" max="48" step="1"></div>
+                    </div>
+                    <div id="path-props" class="prop-group hidden">
+                        <div class="prop-row"><label for="path-color-input">Couleur :</label><input type="color" id="path-color-input"></div>
+                         <div class="color-palette"></div>
+                        <div class="prop-row"><label for="path-width-input">Épaisseur :</label><input type="range" id="path-width-input" min="1" max="10" step="0.5"></div>
+                    </div>
+                    <p id="no-props-message">Sélectionnez un élément ou une scène pour voir ses propriétés.</p>
+                </div>
+            </div>
+            
+            <div class="section-container">
+                <h2>Séquence</h2>
+                <div id="scene-controls">
+                    <button id="add-scene-btn">Dupliquer</button>
+                    <button id="animate-scene-btn">Animer</button>
+                    <button id="play-animation-btn" title="Lancer l'animation"><svg viewBox="0 0 24 24"><path d="M8,5.14V19.14L19,12.14L8,5.14Z" /></svg></button>
+                    <button id="delete-scene-btn" class="danger">Supprimer</button>
+                </div>
+                <ul id="scene-list"></ul>
+            </div>
+            <div class="section-container">
+                <h2>Commentaires de la Scène</h2>
+                <textarea id="comments-textarea" placeholder="Notes pour la scène active..."></textarea>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <div class="section-container">
+                <h2>Outils</h2>
+                <div id="toolbar">
+                     <div class="tool-group">
+                        <button id="tool-select" class="tool-btn" title="Déplacer / Sélectionner"><svg viewBox="0 0 24 24"><path d="M13.62,19.33L12.1,22.45L10.59,19.33L7.47,17.82L10.59,16.3L12.1,13.18L13.62,16.3L16.74,17.82L13.62,19.33M5.5,3L4,6.5L7.5,8L4,9.5L5.5,13L9,11.5L12.5,13L11,9.5L14.5,8L11,6.5L9,3L5.5,3Z" /></svg></button>
+                        <button id="tool-player" class="tool-btn" title="Ajouter Attaquant"><svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" /></svg></button>
+                        <button id="tool-defender" class="tool-btn" title="Ajouter Défenseur"><svg viewBox="0 0 24 24"><path d="M12,1.75A6.25,6.25 0 0,0 5.75,8C5.75,10.87 7.91,13.28 10.7,13.84V16.2L7.2,17.6C6.7,17.8 6.5,18.4 6.7,18.9L7.6,20.8C7.8,21.3 8.4,21.5 8.9,21.3L12,20L15.1,21.3C15.6,21.5 16.2,21.3 16.4,20.8L17.3,18.9C17.5,18.4 17.3,17.8 16.8,17.6L13.3,16.2V13.84C16.09,13.28 18.25,10.87 18.25,8A6.25,6.25 0 0,0 12,1.75Z"/></svg></button>
+                        <button id="tool-ball" class="tool-btn" title="Ajouter Ballon"><svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M4.3,15.24L9.5,13.2L11,18.05L5.82,20.07C4.94,18.6 4.3,16.97 4.3,15.24M18.18,20.07L13,18.05L14.5,13.2L19.7,15.24C19.7,16.97 19.06,18.6 18.18,20.07M19.93,8.93L15.5,10.8L14.1,5.5C15.86,5.88 17.39,6.94 18.5,8.32C19.03,8.44 19.5,8.65 19.93,8.93M9.9,5.5L8.5,10.8L4.07,8.93C4.5,8.65 4.97,8.44 5.5,8.32C6.61,6.94 8.14,5.88 9.9,5.5M12,6.34C10.73,7.3 10.2,8.89 10.5,10.3L12,15L13.5,10.3C13.8,8.89 13.27,7.3 12,6.34Z"/></svg></button>
+                        <button id="tool-cone" class="tool-btn" title="Ajouter Plot"><svg viewBox="0 0 24 24"><path d="M12,2L2,22H22L12,2M12,6.5L17.5,17H6.5L12,6.5Z" /></svg></button>
+                        <button id="tool-hoop" class="tool-btn" title="Ajouter Cerceau"><svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20Z" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+                        <button id="tool-basket" class="tool-btn" title="Ajouter Panier"><svg viewBox="0 0 24 24"><path d="M5,6H19A1,1 0 0,1 19,8H5A1,1 0 0,1 5,6M7,9L10,18H14L17,9H7Z" /></svg></button>
+                        <button id="tool-text" class="tool-btn" title="Ajouter Texte"><svg viewBox="0 0 24 24"><path d="M5,4V7H10.5V19H13.5V7H19V4H5Z" /></svg></button>
+                    </div>
+                    <div class="tool-group">
+                        <button id="tool-arrow" class="tool-btn" title="Tracé de Déplacement"><svg viewBox="0 0 24 24"><path d="M4 12L20 12L16 8M20 12L16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
+                        <button id="tool-pass" class="tool-btn" title="Tracé de Passe"><svg viewBox="0 0 24 24"><path d="M4 12L20 12L16 8M20 12L16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-dasharray="4 4"/></svg></button>
+                        <button id="tool-dribble" class="tool-btn" title="Tracé de Dribble"><svg viewBox="0 0 24 24"><path d="M4 18 Q 8 13, 12 18 T 20 18 M17 15l4-3l-4-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
+                        <button id="tool-screen" class="tool-btn" title="Tracé d'Écran"><svg viewBox="0 0 24 24"><path d="M4 12H18M18 8V16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
+                        <button id="tool-pencil" class="tool-btn" title="Crayon"><svg viewBox="0 0 24 24"><path d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z"/></svg></button>
+                        <button id="tool-zone" class="tool-btn" title="Zone Rectangulaire"><svg viewBox="0 0 24 24" fill-opacity="0.4"><path d="M2,2H22V22H2V2M4,4V20H20V4H4Z" /></svg></button>
+                    </div>
+                    <div class="tool-group">
+                        <button id="view-full-court-btn" class="tool-btn view-btn" title="Terrain Entier">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="6" x2="12" y2="18" stroke="currentColor" stroke-width="1.5"/></svg>
+                        </button>
+                        <button id="view-half-court-btn" class="tool-btn view-btn" title="Demi-Terrain">
+                            <svg viewBox="0 0 24 24"><path d="M12 6V18H3V6H12M12 6C12 9.31 9.31 12 6 12C9.31 12 12 14.69 12 18" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                        </button>
+                    </div>
+                    <div class="tool-group">
+                        <button id="action-undo" title="Annuler (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M12.5,8C9.85,8 7.45,9 5.6,10.6L2,7V16H11L7.38,12.38C8.77,11.22 10.54,10.5 12.5,10.5C16.04,10.5 19.05,12.81 20.1,16L22.47,15.22C21.08,11.03 17.15,8 12.5,8Z"/></svg></button>
+                        <button id="action-redo" title="Rétablir (Ctrl+Y)"><svg viewBox="0 0 24 24"><path d="M18.4,10.6C16.55,9 14.15,8 11.5,8C7.85,8 4.92,11.03 3.53,15.22L1,16C2.95,12.81 5.96,10.5 9.5,10.5C11.46,10.5 13.23,11.22 14.62,12.38L11,16H20V7L18.4,10.6Z"/></svg></button>
+                        <button id="action-mirror" title="Inverser le schéma (Miroir)"><svg viewBox="0 0 24 24"><path d="M12,4L8,8H11V16H8L12,20L16,16H13V8H16L12,4M2,12H4V14H2V12M6,12H8V14H6V12M18,12H20V14H18V12M22,12H24V14H22V12Z"/></svg></button>
+                        <button id="tool-clear" class="danger" title="Effacer la scène"><svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg></button>
+                    </div>
+                </div>
+            </div>
+            <div id="court-container">
+                <div id="court-background-container">
+                    <svg id="court-svg" class="court" viewBox="0 0 280 150" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                        <rect x="0" y="0" width="280" height="150" fill="#BFA98D"/>
+                        <g stroke="#212121" stroke-width="0.6" fill="none"><rect x="0" y="0" width="280" height="150"/><line x1="140" y1="0" x2="140" y2="150"/><rect x="0" y="50.5" width="58" height="49" /><path d="M 58 50.5 A 18 18 0 0 1 58 99.5" /><path d="M 0 6 L 29.1 6 A 67.5 67.5 0 0 1 29.1 144 L 0 144" /><rect x="222" y="50.5" width="58" height="49" /><path d="M 222 50.5 A 18 18 0 0 0 222 99.5" /><path d="M 280 6 L 250.9 6 A 67.5 67.5 0 0 0 250.9 144 L 280 144" /></g>
+                        <g class="center-court-logo">
+                            <circle cx="140" cy="75" r="18" fill="#BFA98D" />
+                            <circle cx="140" cy="75" r="18" fill="none" stroke="#212121" stroke-width="0.6"/>
+                            <text x="140" y="75" font-family="Anton, sans-serif" font-size="14" fill="#212121" text-anchor="middle" dominant-baseline="middle">ORB</text>
+                        </g>
+                        <g stroke="#212121" fill="none"><g transform="translate(15.75, 75)"><line x1="-3.75" y1="-9" x2="-3.75" y2="9" stroke-width="0.8"/><circle cx="0" cy="0" r="2.25" stroke-width="0.5"/><path d="M 0 -12.5 A 12.5 12.5 0 0 1 0 12.5" stroke-width="0.6"/></g><g transform="translate(264.25, 75)"><line x1="3.75" y1="-9" x2="3.75" y2="9" stroke-width="0.8"/><circle cx="0" cy="0" r="2.25" stroke-width="0.5"/><path d="M 0 -12.5 A 12.5 12.5 0 0 0 0 12.5" stroke-width="0.6"/></g></g>
+                    </svg>
+                </div>
+                <canvas id="basketball-court"></canvas>
+            </div>
+        </main>
+    </div>
+
+    <div id="animation-player" class="hidden">
+        <div id="animation-container">
+            <div id="animation-court-background"></div>
+            <canvas id="animation-canvas"></canvas>
+        </div>
+        <div id="animation-controls">
+            <button id="anim-play-pause-btn" title="Play/Pause">
+                <svg id="anim-icon-play" viewBox="0 0 24 24"><path d="M8,5.14V19.14L19,12.14L8,5.14Z" /></svg>
+                <svg id="anim-icon-pause" class="hidden" viewBox="0 0 24 24"><path d="M14,19H18V5H14M6,19H10V5H6V19Z" /></svg>
+            </button>
+            <span id="anim-time-display">0.0s / 0.0s</span>
+            <button id="anim-close-btn" title="Fermer">
+                <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/ccapture.js@1.1.0/build/CCapture.all.min.js"></script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
