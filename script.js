@@ -122,7 +122,6 @@ window.onload = function() {
     togglePlaybookManagerBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         playbookManagerContainer.classList.toggle('hidden');
-        // MODIFICATION: Gérer l'état actif du bouton "onglet"
         togglePlaybookManagerBtn.classList.toggle('active', !playbookManagerContainer.classList.contains('hidden'));
     });
 
@@ -130,7 +129,6 @@ window.onload = function() {
         const isPanelOpen = !playbookManagerContainer.classList.contains('hidden');
         if (isPanelOpen && !playbookManagerContainer.contains(e.target) && !togglePlaybookManagerBtn.contains(e.target)) {
             playbookManagerContainer.classList.add('hidden');
-             // MODIFICATION: Gérer l'état actif du bouton "onglet"
             togglePlaybookManagerBtn.classList.remove('active');
         }
     });
@@ -221,9 +219,13 @@ window.onload = function() {
         
         let hasBall = false;
         if (animParams.isAnimating) {
-            if(animParams.passData) {
-                if (options.id === animParams.passData.passerId && animParams.rawProgress < PASS_RATIO) hasBall = true;
-                if (options.id === animParams.passData.receiverId && animParams.rawProgress >= PASS_RATIO) hasBall = true;
+            // NOUVEAU : Gérer une liste de passes
+            if(animParams.passData && animParams.passData.length > 0) {
+                // Le joueur a le ballon s'il est un passeur qui n'a pas encore lancé, ou un receveur qui a attrapé.
+                hasBall = animParams.passData.some(pass => 
+                    (pass.passerId === options.id && animParams.rawProgress < PASS_RATIO) ||
+                    (pass.receiverId === options.id && animParams.rawProgress >= PASS_RATIO)
+                );
             } else {
                  const currentScene = playbookState.scenes[animParams.sceneIndex];
                  if(currentScene) hasBall = currentScene.elements.some(el => el.type === 'ball' && el.linkedTo === options.id);
@@ -803,8 +805,9 @@ window.onload = function() {
         } else if ((e.key === "Delete" || e.key === "Backspace") && selectedElement) {
             let elements = playbookState.scenes[playbookState.activeSceneIndex].elements;
             if (selectedElement.type === 'player') {
-                const ball = elements.find(b => b.type === 'ball' && b.linkedTo === selectedElement.id);
-                if (ball) ball.linkedTo = null;
+                // MODIFICATION : Détache tous les ballons de ce joueur
+                const balls = elements.filter(b => b.type === 'ball' && b.linkedTo === selectedElement.id);
+                balls.forEach(ball => ball.linkedTo = null);
             }
             playbookState.scenes[playbookState.activeSceneIndex].elements = elements.filter(el => el.id !== selectedElement.id);
             selectedElement = null;
@@ -1248,6 +1251,7 @@ window.onload = function() {
         const consumedPathIds = new Set();
         const originalPlayers = currentScene.elements.filter(el => el.type === "player");
         const movementPaths = currentScene.elements.filter(el => ["arrow", "dribble", "screen"].includes(el.type));
+        
         movementPaths.forEach(path => {
             let closestPlayer = null;
             let minDistance = PROXIMITY_THRESHOLD;
@@ -1268,20 +1272,39 @@ window.onload = function() {
                 consumedPathIds.add(path.id);
             }
         });
+        
+        // MODIFICATION : Gérer plusieurs passes
         const passPaths = currentScene.elements.filter(el => el.type === 'pass');
-        const originalBall = currentScene.elements.find(el => el.type === 'ball');
-        if (originalBall) {
-            for (const path of passPaths) {
-                const passer = originalPlayers.find(p => p.id === originalBall.linkedTo && Math.hypot(p.x - path.points[0].x, p.y - path.points[0].y) < PROXIMITY_THRESHOLD);
-                const receiver = originalPlayers.find(p => p.id !== originalBall.linkedTo && Math.hypot(p.x - path.points[path.points.length - 1].x, p.y - path.points[path.points.length - 1].y) < PROXIMITY_THRESHOLD);
-                if (passer && receiver) {
+        const originalBalls = currentScene.elements.filter(el => el.type === 'ball');
+
+        originalBalls.forEach(originalBall => {
+            if (!originalBall.linkedTo) return; // Le ballon doit avoir un passeur
+
+            const passer = originalPlayers.find(p => p.id === originalBall.linkedTo);
+            if (!passer) return;
+
+            const associatedPath = passPaths.find(path => 
+                !consumedPathIds.has(path.id) && 
+                Math.hypot(passer.x - path.points[0].x, passer.y - path.points[0].y) < PROXIMITY_THRESHOLD
+            );
+
+            if (associatedPath) {
+                const pathEnd = associatedPath.points[associatedPath.points.length - 1];
+                const receiver = originalPlayers.find(p => 
+                    p.id !== passer.id && 
+                    Math.hypot(p.x - pathEnd.x, p.y - pathEnd.y) < PROXIMITY_THRESHOLD
+                );
+
+                if (receiver) {
                     const ballInNewScene = newScene.elements.find(b => b.id === originalBall.id);
-                    if (ballInNewScene) ballInNewScene.linkedTo = receiver.id;
-                    consumedPathIds.add(path.id);
-                    break;
+                    if (ballInNewScene) {
+                        ballInNewScene.linkedTo = receiver.id;
+                    }
+                    consumedPathIds.add(associatedPath.id);
                 }
             }
-        }
+        });
+
         newScene.elements = newScene.elements.filter(el => !consumedPathIds.has(el.id));
         const newIndex = playbookState.activeSceneIndex + 1;
         newScene.name = `Scène ${playbookState.scenes.length + 1}`;
@@ -1347,37 +1370,44 @@ window.onload = function() {
             const endScene = playbookState.scenes[i + 1];
             const transition = {
                 duration: MIN_SCENE_DURATION,
-                passData: null,
-                passPathData: null,
+                // MODIFICATION : passData est maintenant un tableau
+                passData: [], 
+                passPathData: [],
                 tweens: []
             };
 
             const startElementsMap = new Map(startScene.elements.map(e => [e.id, e]));
             const endElementsMap = new Map(endScene.elements.map(e => [e.id, e]));
             
-            const startBall = startScene.elements.find(e => e.type === 'ball');
-            const endBall = endScene.elements.find(e => e.type === 'ball');
-            if (startBall && endBall && startBall.linkedTo && endBall.linkedTo && startBall.linkedTo !== endBall.linkedTo) {
-                transition.passData = {
-                    passerId: startBall.linkedTo,
-                    receiverId: endBall.linkedTo,
-                    ball: endBall
-                };
-                
-                const passPath = startScene.elements.find(el => 
-                    el.type === 'pass' &&
-                    Math.hypot(el.points[0].x - startElementsMap.get(startBall.linkedTo)?.x, el.points[0].y - startElementsMap.get(startBall.linkedTo)?.y) < PROXIMITY_THRESHOLD
-                );
-
-                if (passPath) {
-                    transition.passPathData = {
-                        points: subdividePath(passPath.points),
-                        color: passPath.color,
-                        width: passPath.width,
-                        type: 'pass'
+            // MODIFICATION : On cherche TOUS les ballons
+            const startBalls = startScene.elements.filter(e => e.type === 'ball');
+            
+            startBalls.forEach(startBall => {
+                const endBall = endElementsMap.get(startBall.id);
+                // Si un ballon a changé de joueur attaché, c'est une passe
+                if (endBall && startBall.linkedTo && endBall.linkedTo && startBall.linkedTo !== endBall.linkedTo) {
+                    const passInfo = {
+                        passerId: startBall.linkedTo,
+                        receiverId: endBall.linkedTo,
+                        ball: endBall
                     };
+                    transition.passData.push(passInfo);
+                    
+                    const passPath = startScene.elements.find(el => 
+                        el.type === 'pass' &&
+                        Math.hypot(el.points[0].x - startElementsMap.get(startBall.linkedTo)?.x, el.points[0].y - startElementsMap.get(startBall.linkedTo)?.y) < PROXIMITY_THRESHOLD
+                    );
+
+                    if (passPath) {
+                        transition.passPathData.push({
+                            points: subdividePath(passPath.points),
+                            color: passPath.color,
+                            width: passPath.width,
+                            type: 'pass'
+                        });
+                    }
                 }
-            }
+            });
 
             const consumedPathIds = new Set();
             const allIds = new Set([...startElementsMap.keys(), ...endElementsMap.keys()]);
@@ -1426,7 +1456,8 @@ window.onload = function() {
             } else {
                 const movementDuration = (maxMovementLength / (playbookState.animationSettings.speed || DEFAULT_ANIMATION_SPEED)) * 1000;
                 const finalDuration = Math.max(MIN_SCENE_DURATION, movementDuration);
-                transition.duration = transition.passData ? Math.max(finalDuration, PASS_DURATION) : finalDuration;
+                // La durée de la transition est dictée par la plus longue des actions (mouvement ou passe)
+                transition.duration = transition.passData.length > 0 ? Math.max(finalDuration, PASS_DURATION) : finalDuration;
             }
 
             animationState.storyboard.push(transition);
@@ -1560,7 +1591,8 @@ window.onload = function() {
         };
 
         transition.tweens.forEach(tween => drawAnimatedPath({points: tween.movementPath, type: tween.pathType, color: tween.pathColor, width: tween.pathWidth}));
-        drawAnimatedPath(transition.passPathData);
+        // MODIFICATION : On dessine tous les tracés de passe
+        transition.passPathData.forEach(drawAnimatedPath);
 
         p_ctx.restore();
         
@@ -1592,27 +1624,33 @@ window.onload = function() {
             }
             
             const drawFn = { player: drawPlayer, defender: drawDefender, ball: drawBall, cone: drawCone, hoop: drawHoop, basket: drawBasket, text: drawText }[tween.type];
+            // MODIFICATION : On ne dessine pas les ballons qui sont en pleine passe ici
             if (drawFn && !(tween.type === 'ball' && tween.linkedTo)) {
                 const options = { ...tween, rotation };
                 drawFn(currentPos.x, currentPos.y, false, options, p_ctx, getCoordsWithRect, { isAnimating: true, rawProgress, sceneIndex: currentSceneIndex, passData: transition.passData });
             }
         });
 
-        if (passData) {
+        // MODIFICATION : Boucle sur chaque passe pour l'animer
+        if (passData && passData.length > 0) {
             const passProgress = Math.min(easedMovementProgress / PASS_RATIO, 1.0);
-            const passerTween = tweens.find(t => t.id === passData.passerId);
-            const receiverTween = tweens.find(t => t.id === passData.receiverId);
-            
-            if (passerTween && receiverTween) {
-                const passerPos = getPointOnPath(passerTween.movementPath, easedMovementProgress) || { x: passerTween.startX + (passerTween.endX - passerTween.startX) * easedMovementProgress, y: passerTween.startY + (passerTween.endY - passerTween.startY) * easedMovementProgress };
-                const receiverPos = getPointOnPath(receiverTween.movementPath, easedMovementProgress) || { x: receiverTween.startX + (receiverTween.endX - receiverTween.startX) * easedMovementProgress, y: receiverTween.startY + (receiverTween.endY - receiverTween.startY) * easedMovementProgress };
 
-                if (easedMovementProgress < PASS_RATIO) {
-                    const ballX = passerPos.x + (receiverPos.x - passerPos.x) * passProgress;
-                    const ballY = passerPos.y + (receiverPos.y - passerPos.y) * passProgress;
-                    drawBall(ballX, ballY, false, passData.ball, p_ctx, getCoordsWithRect);
+            passData.forEach(pass => {
+                const passerTween = tweens.find(t => t.id === pass.passerId);
+                const receiverTween = tweens.find(t => t.id === pass.receiverId);
+                
+                if (passerTween && receiverTween) {
+                    const passerPos = getPointOnPath(passerTween.movementPath, easedMovementProgress) || { x: passerTween.startX + (passerTween.endX - passerTween.startX) * easedMovementProgress, y: passerTween.startY + (passerTween.endY - passerTween.startY) * easedMovementProgress };
+                    const receiverPos = getPointOnPath(receiverTween.movementPath, easedMovementProgress) || { x: receiverTween.startX + (receiverTween.endX - receiverTween.startX) * easedMovementProgress, y: receiverTween.startY + (receiverTween.endY - receiverTween.startY) * easedMovementProgress };
+
+                    // Si la passe n'est pas terminée, on dessine le ballon en mouvement
+                    if (easedMovementProgress < PASS_RATIO) {
+                        const ballX = passerPos.x + (receiverPos.x - passerPos.x) * passProgress;
+                        const ballY = passerPos.y + (receiverPos.y - passerPos.y) * passProgress;
+                        drawBall(ballX, ballY, false, pass.ball, p_ctx, getCoordsWithRect);
+                    }
                 }
-            }
+            });
         }
     }
 
