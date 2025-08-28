@@ -1103,7 +1103,8 @@ window.onload = function() {
             await switchToScene(i, true); 
             await new Promise(resolve => setTimeout(resolve, 50));
 
-            const courtImage = await html2canvas(courtContainer, { scale: 3, backgroundColor: null });
+            // MODIFICATION 1 : Réduction du scale pour alléger l'image
+            const courtImage = await html2canvas(courtContainer, { scale: 1.5, backgroundColor: null });
 
             const cellWidth = (PAGE_WIDTH - MARGIN * (layoutConfig.cols + 1)) / layoutConfig.cols;
             const cellHeight = (PAGE_HEIGHT - MARGIN * 4) / layoutConfig.rows;
@@ -1123,10 +1124,12 @@ window.onload = function() {
 
             const diagramHeightRatio = 0.6;
             const diagramContainerHeight = cellHeight * diagramHeightRatio;
-            const imgData = courtImage.toDataURL("image/png");
+
+            // MODIFICATION 2 : Conversion en JPEG avec compression et ajout au PDF
+            const imgData = courtImage.toDataURL("image/jpeg", 0.8); // 0.8 = 80% de qualité
             const imgHeight = Math.min(diagramContainerHeight - 5, courtImage.height * cellWidth / courtImage.width);
             const imgWidth = courtImage.width * imgHeight / courtImage.height;
-            doc.addImage(imgData, "PNG", cellX, cellY + 5, imgWidth, imgHeight);
+            doc.addImage(imgData, "JPEG", cellX, cellY + 5, imgWidth, imgHeight, undefined, 'FAST');
 
             const commentsY = cellY + diagramContainerHeight + 3;
             const commentsHeight = cellHeight * (1 - diagramHeightRatio) - 5;
