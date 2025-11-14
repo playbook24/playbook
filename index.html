@@ -345,10 +345,66 @@
                 </button>
         </header>
         <div class="view-content help-content">
-            </div>
+            
+            <h3>Bienvenue sur ORB Tactical Board</h3>
+            <p>Cet outil vous permet de créer, sauvegarder et organiser vos schémas tactiques (playbooks) de basketball. Voici comment l'utiliser.</p>
+
+            <h3>1. L'Interface Principale</h3>
+            <p>L'interface se compose de 4 zones principales :</p>
+            <ul>
+                <li><strong>Barre d'outils (en haut) :</strong> Contient tous vos outils de dessin (joueurs, passes, flèches...) et les contrôles de vue (terrain entier/demi-terrain).</li>
+                <li><strong>Terrain (au centre) :</strong> Votre zone de dessin principale.</li>
+                <li><strong>Panneau des Propriétés (à gauche) :</strong> Permet de modifier les détails de l'élément sélectionné (ex: couleur ou numéro d'un joueur, épaisseur d'un trait).</li>
+                <li><strong>Panneau de Séquence (à gauche) :</strong> Gère les différentes scènes (étapes) de votre playbook.</li>
+            </ul>
+
+            <h3>2. Créer un Playbook (Séquence)</h3>
+            <p>Un playbook est une suite de "scènes". Chaque scène est une image. L'animation est la transition entre une scène et la suivante.</p>
+            <ul>
+                <li><strong>Ajouter des éléments :</strong> Sélectionnez un outil dans la barre d'outils (ex: <strong>Attaquant</strong>) et cliquez sur le terrain pour le placer.</li>
+                <li><strong>Modifier :</strong> Utilisez l'outil <strong>Sélectionner</strong> (la flèche) pour déplacer ou sélectionner un élément. Ses options s'afficheront dans le panneau "Propriétés".</li>
+                <li><strong>Créer la suite :</strong> Une fois votre première scène prête, cliquez sur <strong>Dupliquer</strong>. Cela copie la scène actuelle et la crée en tant que "Scène 2".</li>
+                <li><strong>Animer :</strong> Sur la Scène 2, déplacez les joueurs ou le ballon vers leur position finale. L'application calculera automatiquement le mouvement entre la Scène 1 et la Scène 2 lors de l'animation.</li>
+                <li><strong>Bouton "Animer" :</strong> Ce bouton intelligent tente de deviner la suite. Il déplace automatiquement les joueurs qui sont au début d'une flèche vers la fin de cette flèche.</li>
+                <li><strong>Commentaires :</strong> Utilisez la zone "Commentaires de la Scène" pour ajouter des notes (points clés, etc.) à la scène active.</li>
+            </ul>
+
+            <h3>3. Gérer vos Fichiers (Panneau Playbook)</h3>
+            <p>Cliquez sur le bouton <strong>"Playbook"</strong> en haut à gauche pour ouvrir le panneau de gestion.</p>
+            <ul>
+                <li><strong>Sauvegarder (Fichier) :</strong> Exporte le playbook actuel (avec toutes ses scènes) dans un fichier <code>.json</code> sur votre ordinateur. C'est une sauvegarde manuelle.</li>
+                <li><strong>Charger (Fichier) :</strong> Importe un fichier <code>.json</code> que vous aviez précédemment sauvegardé.</li>
+                <li><strong>Sauvegarder (Bibliothèque) :</strong> Sauvegarde le playbook actuel dans la mémoire de votre navigateur. C'est le moyen le plus rapide de sauvegarder et de réutiliser un playbook.</li>
+                <li><strong>Exporter (PDF/Vidéo) :</strong> Crée un export de votre playbook.</li>
+            </ul>
+
+            <h3>4. La Bibliothèque (Sauvegarde Locale)</h3>
+            <p>Cliquez sur l'icône "Bibliothèque" (livres) en haut à droite pour voir tous les playbooks que vous avez sauvegardés.</p>
+            <ul>
+                <li><strong>Charger :</strong> Charge le playbook dans l'éditeur.</li>
+                <li><strong>Supprimer :</strong> Supprime le playbook de la bibliothèque.</li>
+                <li><strong>Gérer les tags :</strong> Vous permet de créer des catégories (ex: "U15", "Attaque", "Défense de zone").</li>
+                <li><strong>Assigner les tags (icône étiquette) :</strong> Permet d'organiser vos playbooks en leur assignant les tags que vous avez créés.</li>
+            </ul>
+
+            <h3>5. Le Planificateur d'Entraînement</h3>
+            <p>Cliquez sur l'icône "Calendrier" en haut à droite pour créer des plans de séance.</p>
+            <ul>
+                <li>Créez un <strong>"Nouveau Plan"</strong>.</li>
+                <li>Donnez-lui un nom et des objectifs (notes).</li>
+                <li>Sur la droite, vous voyez la liste de tous les playbooks de votre <strong>Bibliothèque</strong>.</li>
+                <li>Cliquez sur les playbooks pour les ajouter à votre plan.</li>
+                <li>Une fois terminé, vous pouvez exporter le plan complet en <strong>PDF</strong>.</li>
+            </ul>
+
+            <h3>6. TRÈS IMPORTANT : Sauvegarde (Backup)</h3>
+            <p>Toutes vos données (Bibliothèque, Plans) sont stockées <strong>uniquement dans votre navigateur</strong>. Si vous videz le cache de votre navigateur, vous perdrez tout.</p>
+            <p>Pour éviter cela, utilisez régulièrement le bouton <strong>"Sauvegarder TOUT (Backup)"</strong> dans le panneau "Playbook" (en haut à gauche).</p>
+            <p>Cela exportera un <strong>fichier de backup unique</strong> (un <code>.json</code>) contenant TOUS vos playbooks, TOUS vos tags et TOUS vos plans. Conservez ce fichier en lieu sûr. Si vous changez d'ordinateur ou si vous perdez vos données, vous pourrez tout restaurer en utilisant le bouton <strong>"Charger"</strong> et en sélectionnant ce fichier de backup.</p>
+
+        </div>
     </div>
-
-
+    
     <div id="plan-editor-modal" class="hidden">
         <div id="plan-editor-content">
             <header id="plan-editor-header">
