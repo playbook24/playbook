@@ -1,8 +1,9 @@
 /**
  * planner.js
- * Gère le Planificateur d'Entraînement (Version 4.2)
+ * Gère le Planificateur d'Entraînement (Version 4.3)
  *
- * CORRECTION v2.1 : Mise à jour de l'export PDF (plus léger et pratique)
+ * CORRECTION v4.3 : Ajout d'une vérification de type sur le Blob d'aperçu
+ * pour empêcher le plantage du sélecteur après un mauvais import.
  */
 
 function initPlanner() {
@@ -266,6 +267,9 @@ function initPlanner() {
         renderPlaybookSelectorUI(filteredList);
     }
 
+    // ---
+    // --- FONCTION MODIFIÉE (v4.3) ---
+    // ---
     function renderPlaybookSelectorUI(items) {
         planSelectorList.innerHTML = '';
         
@@ -274,6 +278,8 @@ function initPlanner() {
             return;
         }
 
+        const errorIconUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23D32F2F' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E";
+
         items.forEach(item => {
             const div = document.createElement('div');
             div.className = 'plan-selector-item';
@@ -281,26 +287,46 @@ function initPlanner() {
             div.dataset.name = item.name;
 
             const playbook = item;
-            const previewUrl = URL.createObjectURL(playbook.preview);
+            let previewUrl = errorIconUrl;
+            let needsRevoke = false;
+
+            // Vérifie si l'aperçu est un Blob valide
+            if (playbook.preview instanceof Blob) {
+                try {
+                    previewUrl = URL.createObjectURL(playbook.preview);
+                    needsRevoke = true;
+                } catch (e) {
+                    console.error("Erreur createObjectURL (sélecteur):", e);
+                }
+            }
+            
             div.title = `Ajouter "${playbook.name}" au plan`;
             div.innerHTML = `
                 <img src="${previewUrl}" alt="Aperçu">
                 <span>${playbook.name}</span>
             `;
-            div.querySelector('img').onload = () => {
-                URL.revokeObjectURL(previewUrl);
-            };
+            
+            if (needsRevoke) {
+                div.querySelector('img').onload = () => {
+                    URL.revokeObjectURL(previewUrl);
+                };
+            }
             
             planSelectorList.appendChild(div);
         });
     }
 
+    // ---
+    // --- FONCTION MODIFIÉE (v4.3) ---
+    // ---
     function renderPlanPlaybooksList() {
         planPlaybooksList.innerHTML = '';
         if (currentPlan.playbookIds.length === 0) {
             planPlaybooksList.innerHTML = '<li class="plan-editor-empty-list">Ajoutez des exercices depuis la bibliothèque de droite.</li>';
             return;
         }
+        
+        const errorIconUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23D32F2F' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E";
 
         currentPlan.playbookIds.forEach(playbookId => {
             const playbook = fullPlaybookData.get(playbookId);
@@ -311,14 +337,27 @@ function initPlanner() {
             if (!playbook) {
                 li.classList.add('deleted');
                  li.innerHTML = `
-                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23D32F2F' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E" alt="Supprimé">
+                    <img src="${errorIconUrl}" alt="Supprimé">
                     <span>(Exercice supprimé : ${playbookId})</span>
                     <button class="btn-remove-from-plan danger" title="Retirer du plan">
                         <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
                     </button>
                 `;
             } else {
-                const previewUrl = URL.createObjectURL(playbook.preview);
+                
+                let previewUrl = errorIconUrl;
+                let needsRevoke = false;
+
+                // Vérifie si l'aperçu est un Blob valide
+                if (playbook.preview instanceof Blob) {
+                    try {
+                        previewUrl = URL.createObjectURL(playbook.preview);
+                        needsRevoke = true;
+                    } catch (e) {
+                         console.error("Erreur createObjectURL (liste plan):", e);
+                    }
+                }
+                
                 li.innerHTML = `
                     <img src="${previewUrl}" alt="Aperçu">
                     <span>${playbook.name}</span>
@@ -326,9 +365,12 @@ function initPlanner() {
                         <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
                     </button>
                 `;
-                li.querySelector('img').onload = () => {
-                    URL.revokeObjectURL(previewUrl);
-                };
+                
+                if (needsRevoke) {
+                    li.querySelector('img').onload = () => {
+                        URL.revokeObjectURL(previewUrl);
+                    };
+                }
             }
             planPlaybooksList.appendChild(li);
         });
@@ -358,7 +400,7 @@ function initPlanner() {
     }
 
     // ---
-    // --- FONCTION D'EXPORT PDF ENTIÈREMENT RÉÉCRITE ---
+    // --- FONCTION D'EXPORT PDF (INCHANGÉE) ---
     // ---
     async function exportPlanToPDF(plan) {
         if (typeof window.jspdf === 'undefined') {
@@ -430,6 +472,12 @@ function initPlanner() {
         // Fonction pour convertir un Blob en DataURL
         const blobToDataURL = (blob) => {
             return new Promise((resolve, reject) => {
+                // --- AJOUT VÉRIFICATION ---
+                if (!(blob instanceof Blob)) {
+                    reject(new Error("Donnée n'est pas un Blob."));
+                    return;
+                }
+                // --- FIN VÉRIFICATION ---
                 const reader = new FileReader();
                 reader.onload = (e) => resolve(e.target.result);
                 reader.onerror = (e) => reject(e.target.error);
@@ -462,11 +510,18 @@ function initPlanner() {
 
             // --- Colonne de Gauche (Image) ---
             try {
-                const imgData = await blobToDataURL(imgBlob);
+                const imgData = await blobToDataURL(imgBlob); // imgBlob est vérifié dans la fonction
                 // Force la conversion en JPEG (plus léger) et compresse
                 doc.addImage(imgData, 'JPEG', LEFT_COL_X, startY, LEFT_COL_WIDTH, IMG_HEIGHT, undefined, 'FAST');
             } catch (error) {
-                doc.text("Erreur image", LEFT_COL_X, startY);
+                // Si le blob est corrompu, on dessine un rectangle d'erreur
+                doc.setDrawColor(211, 47, 47); // Rouge
+                doc.setFillColor(250, 250, 250); // Fond clair
+                doc.rect(LEFT_COL_X, startY, LEFT_COL_WIDTH, IMG_HEIGHT, 'FD');
+                doc.setTextColor(211, 47, 47);
+                doc.setFontSize(10);
+                doc.text("Aperçu corrompu", LEFT_COL_X + LEFT_COL_WIDTH / 2, startY + IMG_HEIGHT / 2, { align: 'center' });
+                doc.setTextColor(0,0,0);
             }
             
             // --- Colonne de Droite (Texte) ---
