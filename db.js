@@ -7,7 +7,7 @@
  */
 
 class ORBDatabase {
-    // On garde le même nom de base
+    // NOM DE BDD DIFFÉRENT POUR FORCER LA RÉINITIALISATION
     constructor(dbName = 'ORB_Playbook_Reset_v4', storeName = 'playbooks') {
         this.dbName = dbName;
         this.storeName = storeName;
@@ -121,6 +121,7 @@ class ORBDatabase {
         return new Promise((resolve, reject) => {
             const tx = this.db.transaction(['playbooks'], 'readonly');
             tx.objectStore('playbooks').getAll().onsuccess = (e) => resolve(e.target.result);
+            tx.onerror = (e) => reject(e.target.error); // Ajout d'un gestionnaire d'erreur
         });
     }
     async getPlaybook(id) {
@@ -128,6 +129,7 @@ class ORBDatabase {
         return new Promise((resolve, reject) => {
             const tx = this.db.transaction(['playbooks'], 'readonly');
             tx.objectStore('playbooks').get(id).onsuccess = (e) => resolve(e.target.result);
+            tx.onerror = (e) => reject(e.target.error);
         });
     }
     async deletePlaybook(id) {
@@ -135,40 +137,31 @@ class ORBDatabase {
         return new Promise((resolve, reject) => {
             const tx = this.db.transaction(['playbooks'], 'readwrite');
             tx.objectStore('playbooks').delete(id).onsuccess = () => resolve(true);
+            tx.onerror = (e) => reject(e.target.error);
         });
     }
 
     // --- NOUVELLES FONCTIONS DE GESTION DES TAGS ---
 
-    /**
-     * Récupère la liste de tous les tags maîtres.
-     */
     async getAllTags() {
         if (!this.db) await this.open();
         return new Promise((resolve, reject) => {
             const tx = this.db.transaction(['tags'], 'readonly');
             tx.objectStore('tags').getAll().onsuccess = (e) => resolve(e.target.result);
+            tx.onerror = (e) => reject(e.target.error); // Ajout d'un gestionnaire d'erreur
         });
     }
 
-    /**
-     * Ajoute un nouveau tag à la liste maître.
-     * @param {string} name Le nom du tag (ex: "Attaque")
-     */
     async addTag(name) {
         if (!this.db) await this.open();
         return new Promise((resolve, reject) => {
             const tx = this.db.transaction(['tags'], 'readwrite');
             const req = tx.objectStore('tags').add({ name: name });
             req.onsuccess = (e) => resolve(e.target.result);
-            req.onerror = (e) => reject(e.target.error); // Échouera si le nom existe déjà
+            req.onerror = (e) => reject(e.target.error); 
         });
     }
 
-    /**
-     * Supprime un tag de la liste maître.
-     * @param {number} id L'ID du tag à supprimer
-     */
     async deleteTag(id) {
         if (!this.db) await this.open();
         return new Promise((resolve, reject) => {
@@ -179,24 +172,16 @@ class ORBDatabase {
         });
     }
 
-    /**
-     * CORRIGÉ : Assigne un tableau d'ID de tags à un playbook.
-     * @param {number} playbookId L'ID du playbook à mettre à jour
-     * @param {number[]} tagIdsArray Le tableau d'IDs (ex: [1, 3, 5])
-     */
     async assignTagsToPlaybook(playbookId, tagIdsArray) {
         if (!this.db) await this.open();
 
-        // 1. Récupérer le playbook (l'await est maintenant à l'extérieur)
         const playbook = await this.getPlaybook(playbookId);
         if (!playbook) {
             throw new Error("Playbook non trouvé.");
         }
         
-        // 2. Mettre à jour ses tagIds
         playbook.tagIds = tagIdsArray;
 
-        // 3. Ouvrir une transaction et sauvegarder (put)
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['playbooks'], 'readwrite');
             const store = transaction.objectStore('playbooks');
@@ -206,10 +191,6 @@ class ORBDatabase {
         });
     }
 
-    /**
-     * NOUVEAU : Efface toutes les données et les remplace par les données du backup.
-     * @param {object} data - L'objet contenant { playbooks: [], tags: [], trainingPlans: [] }
-     */
     async importBackupData(data) {
         if (!this.db) await this.open();
 
@@ -252,7 +233,7 @@ class ORBDatabase {
 
             } catch (error) {
                 console.error("Erreur lors de l'ajout des données du backup:", error);
-                transaction.abort(); // Annule la transaction en cas d'erreur
+                transaction.abort(); 
                 reject(error);
             }
         });
@@ -281,6 +262,7 @@ class ORBDatabase {
         return new Promise((resolve, reject) => {
             const tx = this.db.transaction(['trainingPlans'], 'readonly');
             tx.objectStore('trainingPlans').getAll().onsuccess = (e) => resolve(e.target.result);
+            tx.onerror = (e) => reject(e.target.error);
         });
     }
     async getPlan(id) {
@@ -288,6 +270,7 @@ class ORBDatabase {
         return new Promise((resolve, reject) => {
             const tx = this.db.transaction(['trainingPlans'], 'readonly');
             tx.objectStore('trainingPlans').get(id).onsuccess = (e) => resolve(e.target.result);
+            tx.onerror = (e) => reject(e.target.error);
         });
     }
     async deletePlan(id) {
@@ -295,6 +278,7 @@ class ORBDatabase {
         return new Promise((resolve, reject) => {
             const tx = this.db.transaction(['trainingPlans'], 'readwrite');
             tx.objectStore('trainingPlans').delete(id).onsuccess = () => resolve(true);
+            tx.onerror = (e) => reject(e.target.error);
         });
     }
 }
