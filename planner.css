@@ -1,0 +1,402 @@
+/**
+ * planner.css
+ * Styles pour le planificateur d'entraînement.
+ */
+
+/* --- Grille des Plans (similaire à la bibliothèque) --- */
+#planner-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.planner-empty-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 1.1em;
+    color: var(--color-text);
+    opacity: 0.7;
+    margin-top: 40px;
+}
+
+/* --- Bouton "Nouveau Plan" --- */
+.card-new-plan {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    border: 3px dashed var(--color-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    background-color: transparent;
+    color: var(--color-text);
+    opacity: 0.7;
+}
+.card-new-plan:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-background);
+    color: var(--color-primary);
+    opacity: 1;
+}
+.card-new-plan-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+.card-new-plan-content svg {
+    width: 40px;
+    height: 40px;
+    fill: currentColor;
+}
+
+body.dark-mode .card-new-plan {
+    color: var(--color-text-on-dark);
+}
+body.dark-mode .card-new-plan:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-container-background);
+    color: var(--color-primary);
+}
+
+
+/* --- Cartes de Plan (similaire à playbook-card) --- */
+.plan-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-container-background);
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    transition: all 0.2s ease-in-out;
+}
+.plan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lifted);
+}
+
+.plan-card-info {
+    padding: 15px;
+    flex-grow: 1;
+}
+.plan-card-info h3 {
+    font-family: var(--font-body);
+    font-weight: bold;
+    font-size: 1.2em;
+    margin: 0 0 10px 0;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+body.dark-mode .plan-card-info h3 {
+    color: var(--color-text-on-dark);
+}
+.plan-card-info .plan-stat {
+    font-size: 0.9em;
+    color: var(--color-text);
+    opacity: 0.8;
+    margin: 0 0 5px 0;
+}
+body.dark-mode .plan-card-info .plan-stat {
+    color: var(--color-text-on-dark);
+}
+
+.plan-card-actions {
+    display: flex;
+    gap: 8px;
+    padding: 0 15px 15px 15px;
+    border-top: 1px solid var(--color-border);
+    padding-top: 15px;
+    margin-top: 10px;
+}
+.plan-card-actions button {
+    flex-grow: 1;
+    height: 38px;
+    padding: 6px;
+    min-width: 38px;
+}
+.plan-card-actions .btn-export-plan {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-button-text-on-gold);
+}
+body.dark-mode .plan-card-actions .btn-export-plan {
+    color: var(--color-button-text-on-gold);
+}
+
+
+/* --- Modale d'édition de Plan --- */
+#plan-editor-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#plan-editor-content {
+    width: 100%;
+    max-width: 900px;
+    height: 90vh;
+    background-color: var(--color-background); /* Fond différent pour contraster */
+    border-radius: 12px;
+    box-shadow: var(--shadow-lifted);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#plan-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    background-color: var(--color-container-background);
+    border-bottom: 1px solid var(--color-border);
+}
+#plan-editor-header h3 {
+    font-family: var(--font-title);
+    font-size: 1.5em;
+    margin: 0;
+    color: var(--color-secondary);
+    letter-spacing: 1px;
+}
+body.dark-mode #plan-editor-header h3 {
+    color: var(--color-primary);
+}
+
+#plan-editor-body {
+    display: flex;
+    flex-grow: 1;
+    overflow-y: hidden; /* Géré par les panneaux internes */
+}
+
+/* Panneau de gauche (Détails + Liste des exos) */
+#plan-editor-main {
+    flex: 2;
+    padding: 20px;
+    overflow-y: auto;
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.plan-editor-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.plan-editor-group label {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: var(--color-text);
+    opacity: 0.9;
+}
+#plan-editor-name {
+    width: 100%;
+    padding: 12px 15px; 
+    border-radius: 8px; 
+    border: 1px solid var(--color-input-border); 
+    font-family: var(--font-body);
+    font-size: 1.2em;
+    background-color: var(--color-input-background);
+    color: var(--color-text);
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+#plan-editor-notes {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px 15px; 
+    border-radius: 8px; 
+    border: 1px solid var(--color-input-border); 
+    font-family: var(--font-body);
+    font-size: 1em;
+    background-color: var(--color-input-background);
+    color: var(--color-text);
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+#plan-playbooks-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    min-height: 100px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background-color: var(--color-container-background);
+}
+.plan-playbook-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid var(--color-border);
+}
+.plan-playbook-item:last-child {
+    border-bottom: none;
+}
+.plan-playbook-item img {
+    width: 84px; /* (280/150) * 45px */
+    height: 45px;
+    object-fit: cover;
+    border-radius: 4px;
+    background-color: var(--color-background);
+}
+.plan-playbook-item span {
+    flex-grow: 1;
+    font-weight: bold;
+}
+.plan-playbook-item .btn-remove-from-plan {
+    min-width: 35px;
+    height: 35px;
+    padding: 5px;
+}
+
+.plan-editor-empty-list {
+    text-align: center;
+    padding: 30px;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* Panneau de droite (Sélecteur d'exercices) */
+#plan-editor-playbook-selector {
+    flex: 1;
+    min-width: 300px;
+    background-color: var(--color-container-background);
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+#plan-editor-playbook-selector h4 {
+    margin: 0 0 15px 0;
+    font-family: var(--font-title);
+    font-size: 1.2em;
+    color: var(--color-secondary);
+}
+body.dark-mode #plan-editor-playbook-selector h4 {
+    color: var(--color-primary);
+}
+#plan-selector-search {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--color-input-border);
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    background-color: var(--color-input-background);
+    color: var(--color-text);
+}
+#plan-selector-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+.plan-selector-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.plan-selector-item:last-child {
+    border-bottom: none;
+}
+.plan-selector-item:hover {
+    background-color: var(--color-background);
+}
+body.dark-mode .plan-selector-item:hover {
+    background-color: #2a2a2a;
+}
+.plan-selector-item img {
+    width: 70px; /* (280/150) * 37.5px */
+    height: 37.5px;
+    object-fit: cover;
+    border-radius: 4px;
+    background-color: var(--color-background);
+}
+.plan-selector-item span {
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+
+/* Pied de page de la modale */
+#plan-editor-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 25px;
+    border-top: 1px solid var(--color-border);
+    background-color: var(--color-container-background);
+}
+#plan-editor-footer button {
+    padding: 10px 20px;
+    font-size: 1em;
+    min-width: 120px;
+    height: auto;
+}
+#plan-editor-save-btn {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-button-text-on-gold);
+}
+body.dark-mode #plan-editor-save-btn {
+    color: var(--color-button-text-on-gold);
+}
+/* --- NOUVEAU : Styles pour le Sélecteur de Playbook (Tags) --- */
+
+#plan-editor-playbook-selector {
+    /* S'assure que le panneau a une disposition en colonne */
+    display: flex;
+    flex-direction: column;
+}
+
+#plan-selector-search {
+    /* S'assure que la barre de recherche garde sa place */
+    flex-shrink: 0;
+}
+
+#plan-selector-list {
+    /* S'assure que la liste prend la place restante et peut défiler */
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Style de la nouvelle barre de filtres (réutilise le style de manager.css) */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 15px; /* Un peu d'espace intérieur */
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0; /* Empêche la barre de filtres de rétrécir */
+}
+
+.filter-bar button {
+    height: 30px;
+    font-size: 0.8em;
+    padding: 4px 10px;
+}

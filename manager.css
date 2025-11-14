@@ -1,0 +1,297 @@
+/**
+ * manager.css
+ * Styles pour la bibliothèque (Version Tags Gérés v4.2)
+ */
+
+/* --- Styles des boutons du Header (Inchangé) --- */
+.header-right .btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--color-text-on-dark);
+    padding: 0 8px;
+    height: 40px;
+    min-width: 40px;
+}
+.header-right .btn-icon svg {
+    width: 26px;
+    height: 26px;
+    fill: currentColor;
+}
+.header-right .btn-icon:hover {
+    color: var(--color-primary);
+    transform: none;
+    box-shadow: none;
+}
+@media (max-width: 800px) {
+    .header-right { gap: 5px; }
+    .header-right .btn-icon { padding: 0 5px; }
+}
+
+
+/* --- Bouton "Sauvegarder" (Inchangé) --- */
+#save-to-library-btn {
+    flex-grow: 1;
+}
+#save-to-library-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+
+/* --- Vues Modales Plein Écran (Inchangé) --- */
+.fullscreen-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--color-background);
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.fullscreen-view.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+.view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    background-color: var(--color-container-background);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow-soft);
+    flex-shrink: 0;
+}
+.view-header h2 {
+    font-family: var(--font-title);
+    font-size: 1.5em;
+    margin: 0;
+    color: var(--color-secondary);
+    letter-spacing: 1px;
+}
+body.dark-mode .view-header h2 {
+    color: var(--color-primary);
+}
+.view-header .view-close-btn { min-width: 40px; }
+.view-header .view-close-btn svg { width: 24px; height: 24px; }
+.view-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 25px;
+}
+@media (max-width: 800px) {
+    .view-header { padding: 10px 15px; }
+     .view-header h2 { font-size: 1.3em; }
+    .view-content { padding: 15px; }
+}
+
+/* --- Grille de la Bibliothèque (Inchangé) --- */
+#library-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+.library-empty-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 1.1em;
+    color: var(--color-text);
+    opacity: 0.7;
+    margin-top: 40px;
+}
+
+/* --- Cartes Playbook (Mises à jour) --- */
+.playbook-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-container-background);
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    transition: all 0.2s ease-in-out;
+}
+.playbook-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lifted);
+}
+.card-preview {
+    width: 100%;
+    aspect-ratio: 280 / 150;
+    background-color: var(--color-background);
+    border-bottom: 1px solid var(--color-border);
+    overflow: hidden;
+}
+.card-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.card-info {
+    padding: 12px 15px;
+    flex-grow: 1;
+}
+.card-info h3 {
+    font-family: var(--font-body);
+    font-weight: bold;
+    font-size: 1.1em;
+    margin: 0 0 5px 0;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+body.dark-mode .card-info h3 {
+    color: var(--color-text-on-dark);
+}
+.card-info p {
+    font-size: 0.85em;
+    color: var(--color-text);
+    opacity: 0.7;
+    margin: 0;
+}
+body.dark-mode .card-info p {
+    color: var(--color-text-on-dark);
+}
+
+/* --- NOUVEAU : Styles pour les Tags sur la carte --- */
+.card-tags {
+    padding: 0 15px 10px 15px; /* Espace avant les actions */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.card-tags span {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    opacity: 0.8;
+    font-size: 0.75em;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+}
+body.dark-mode .card-tags span {
+    background-color: #2a2a2a;
+    color: var(--color-text-on-dark);
+    border-color: #444;
+}
+/* --- FIN Styles Tags Carte --- */
+
+.card-actions {
+    display: flex;
+    gap: 8px;
+    padding: 0 15px 15px 15px;
+    border-top: 1px solid var(--color-border); /* Séparateur */
+    padding-top: 12px;
+    margin-top: auto; /* Pousse les actions en bas */
+}
+.card-actions button {
+    flex-grow: 1;
+    height: 35px;
+    padding: 6px;
+    min-width: 35px;
+}
+/* NOUVEAU : Bouton "Assigner Tags" */
+.card-btn-assign-tags {
+    flex-grow: 0; /* Ne grandit pas */
+    min-width: 35px;
+    width: 35px;
+}
+
+/* --- NOUVEAU : Barre de Contrôles Bibliothèque --- */
+.library-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: var(--color-container-background);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    flex-wrap: wrap; /* Permet aux filtres de passer à la ligne */
+    gap: 8px;
+}
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex-grow: 1;
+}
+.filter-bar button {
+    height: 35px;
+    font-size: 0.85em;
+}
+#btn-manage-tags {
+    height: 35px;
+    flex-shrink: 0; /* Empêche le bouton de rétrécir */
+}
+
+/* --- NOUVEAU : Styles pour les Modales de Tags --- */
+
+/* Liste des tags dans "Gérer les Tags" */
+.tag-management-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.tag-management-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    font-weight: bold;
+}
+.tag-management-list li:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
+}
+.tag-management-list .tag-delete-btn {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    padding: 4px;
+}
+
+/* Liste des tags dans "Assigner les Tags" */
+.tag-assign-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 15px;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+.tag-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1em;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.tag-checkbox-label:hover {
+    background-color: var(--color-background);
+}
+body.dark-mode .tag-checkbox-label:hover {
+    background-color: #2a2a2a;
+}
+.tag-checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* --- SUPPRESSION DES ANCIENS STYLES DE DOSSIER --- */
+/* Tous les styles pour .folder-card, .breadcrumb-nav, .library-drop-hint, .dragging, .drag-over ont été supprimés */
