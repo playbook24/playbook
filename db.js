@@ -1,9 +1,11 @@
 /**
  * db.js
- * VERSION STABLE (v4) - MISE À JOUR v2 : Ajout des Tags Gérés
+ * VERSION STABLE (v4.5) - CORRECTION MAJEURE
  * Base de données : ORB_Playbook_Reset_v4
  *
- * CORRECTION v2.1 : Correction du bug dans assignTagsToPlaybook
+ * CORRECTION v4.5 : 
+ * - Réécriture de savePlaybook pour corriger le blocage lors de la mise à jour (écrasement).
+ * - Correction de importBackupData (dataURLToBlob) pour gérer les dataURL nulles.
  */
 
 class ORBDatabase {
@@ -78,28 +80,55 @@ class ORBDatabase {
         });
     }
 
-    // --- Sauvegarde Playbook (Modifié pour préserver/initialiser tagIds) ---
+    // ---
+    // --- FONCTION savePlaybook (Corrigée v4.5) ---
+    // ---
     async savePlaybook(playbookData, previewBlob, id = null) {
         if (!this.db) await this.open();
 
-        return new Promise(async (resolve, reject) => {
+        // La fonction entière est enveloppée dans une promesse
+        return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['playbooks'], 'readwrite');
             const store = transaction.objectStore('playbooks');
-            
             let record;
 
             if (id) {
-                // MISE À JOUR : On récupère l'ancien pour ne pas écraser les tagIds
-                const existing = await this.getPlaybook(id);
-                record = {
-                    ...existing, // Conserve les anciens champs (comme tagIds)
-                    name: playbookData.name || 'Playbook sans nom',
-                    playbookData: playbookData,
-                    preview: previewBlob,
-                    id: id // S'assure que l'ID est correct
+                // --- MISE À JOUR (UPDATE) ---
+                // 1. Récupérer l'enregistrement en utilisant la transaction ACTUELLE
+                const getRequest = store.get(id);
+
+                getRequest.onerror = (e) => {
+                    console.error("Erreur (get) lors de la mise à jour:", e.target.error);
+                    reject(e.target.error);
                 };
+
+                // 2. Lorsque la lecture réussit, créer le nouvel enregistrement
+                getRequest.onsuccess = (e) => {
+                    const existing = e.target.result;
+                    if (!existing) {
+                        reject(new Error(`Playbook avec ID ${id} introuvable.`));
+                        return;
+                    }
+
+                    record = {
+                        ...existing, // Conserve les anciens champs (tagIds, createdAt)
+                        name: playbookData.name || 'Playbook sans nom',
+                        playbookData: playbookData,
+                        preview: previewBlob, // Remplace l'aperçu
+                        id: id // S'assure que l'ID est correct
+                    };
+
+                    // 3. Remettre l'enregistrement dans la base (toujours dans la même transaction)
+                    const putRequest = store.put(record);
+                    putRequest.onsuccess = (e) => resolve(e.target.result); // Renvoie l'ID
+                    putRequest.onerror = (e) => {
+                        console.error("Erreur (put) lors de la mise à jour:", e.target.error);
+                        reject(e.target.error);
+                    };
+                };
+
             } else {
-                // NOUVEAU : On initialise tagIds
+                // --- NOUVEAU (CREATE) ---
                 record = {
                     name: playbookData.name || 'Playbook sans nom',
                     playbookData: playbookData,
@@ -107,13 +136,18 @@ class ORBDatabase {
                     createdAt: new Date(),
                     tagIds: [] // Initialise avec un tableau vide
                 };
-            }
 
-            const request = store.put(record); // 'put' gère à la fois la création et la mise à jour
-            request.onsuccess = (e) => resolve(e.target.result);
-            request.onerror = (e) => reject(e.target.error);
+                // 4. Ajouter le nouvel enregistrement
+                const addRequest = store.add(record);
+                addRequest.onsuccess = (e) => resolve(e.target.result); // Renvoie le nouvel ID
+                addRequest.onerror = (e) => {
+                    console.error("Erreur (add) lors de la création:", e.target.error);
+                    reject(e.target.error);
+                };
+            }
         });
     }
+
 
     // --- Fonctions Playbook (Inchangées) ---
     async getAllPlaybooks() {
@@ -191,8 +225,42 @@ class ORBDatabase {
         });
     }
 
+    // ---
+    // --- FONCTION importBackupData (Corrigée v4.5) ---
+    // ---
     async importBackupData(data) {
         if (!this.db) await this.open();
+
+        // Fonction d'aide pour convertir un DataURL (base64) en Blob
+        const dataURLToBlob = (dataURL) => {
+            // Si ce n'est pas une chaîne ou pas une DataURL, on retourne null
+            // C'est le cas pour les aperçus déjà corrompus dans le backup
+            if (!dataURL || typeof dataURL !== 'string' || !dataURL.startsWith('data:')) {
+                return null; 
+            }
+            
+            try {
+                const arr = dataURL.split(',');
+                if (arr.length < 2) return null; // Format invalide
+                
+                const mimeMatch = arr[0].match(/:(.*?);/);
+                if (!mimeMatch) return null; // Format invalide
+                
+                const mime = mimeMatch[1];
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                
+                while(n--){
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                
+                return new Blob([u8arr], {type:mime});
+            } catch (e) {
+                console.error("Échec de la conversion DataURL en Blob:", e);
+                return null; // Retourne null en cas d'échec
+            }
+        };
 
         return new Promise((resolve, reject) => {
             const storeNames = ['playbooks', 'tags', 'trainingPlans'];
@@ -222,9 +290,15 @@ class ORBDatabase {
                 if (data.tags) {
                     data.tags.forEach(tag => tagStore.add(tag));
                 }
+                
                 if (data.playbooks) {
-                    data.playbooks.forEach(pb => pbStore.add(pb));
+                    data.playbooks.forEach(pb => {
+                        // Reconvertit la chaîne base64 en Blob (ou null si corrompu)
+                        pb.preview = dataURLToBlob(pb.preview); 
+                        pbStore.add(pb);
+                    });
                 }
+                
                 if (data.trainingPlans) {
                     data.trainingPlans.forEach(plan => planStore.add(plan));
                 }
