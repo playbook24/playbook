@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="manager.css">
+    <link rel="stylesheet" href="planner.css">
 </head>
 <body class="view-full-court">
 
@@ -24,10 +26,15 @@
                 <h1>ORB <span class="highlight">TACTICAL BOARD</span></h1>
             </div>
             <div class="header-right">
-                <span class="creator-credit">Par Augier Flavien</span>
-                <button id="theme-toggle-btn" title="Changer le thème">
-                    <svg id="theme-icon-sun" viewBox="0 0 24 24"><path fill="currentColor" d="M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7z M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9z M2,12c0,0.55,0.45,1,1,1h1c0.55,0,1-0.45,1-1s-0.45-1-1-1H3C2.45,11,2,11.45,2,12z M19,11h-1c-0.55,0-1,0.45-1,1s0.45,1,1,1h1c0.55,0,1-0.45,1-1S19.55,11,19,11z M11,19v1c0,0.55,0.45,1,1,1s1-0.45,1-1v-1c0-0.55-0.45-1-1-1S11,18.45,11,19z M11,2v1c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M5.99,4.58c-0.39-0.39-1.02-0.39-1.41,0l-0.71,0.71c-0.39,0.39-0.39,1.02,0,1.41s1.02,0.39,1.41,0l0.71-0.71C6.38,5.61,6.38,4.97,5.99,4.58z M18.36,17.66c-0.39-0.39-1.02-0.39-1.41,0l-0.71,0.71c-0.39,0.39-0.39,1.02,0,1.41s1.02,0.39,1.41,0l0.71-0.71C18.75,18.68,18.75,18.05,18.36,17.66z M17.66,5.99c0.39-0.39,0.39-1.02,0-1.41l-0.71-0.71c-0.39-0.39-1.02-0.39-1.41,0s-0.39,1.02,0,1.41l0.71,0.71C16.63,6.38,17.27,6.38,17.66,5.99z M4.58,18.36c0.39-0.39,0.39-1.02,0-1.41l-0.71-0.71c-0.39-0.39-1.02-0.39-1.41,0s-0.39,1.02,0,1.41l0.71,0.71C3.56,18.75,4.19,18.75,4.58,18.36z"/></svg>
-                    <svg id="theme-icon-moon" class="hidden" viewBox="0 0 24 24"><path fill="currentColor" d="M12.3,4.9C10.9,4.4,9.4,4.5,8.1,5.2c-1.4,0.7-2.5,1.9-3.2,3.4c-0.7,1.5-0.7,3.2-0.1,4.8c0.6,1.6,1.8,2.9,3.3,3.7c1.5,0.8,3.2,0.9,4.7,0.4c1.5-0.5,2.8-1.5,3.6-2.9c0.8-1.4,1.1-3,0.7-4.5c-0.4-1.5-1.3-2.8-2.5-3.8C14,5.2,13.2,5,12.3,4.9z"/></svg>
+                <button id="show-library-btn" class="btn-icon" title="Bibliothèque de Playbooks">
+                    <svg viewBox="0 0 24 24"><path d="M4 6H2V20C2 21.1 2.9 22 4 22H18V20H4V6M20 2H8C6.9 2 6 2.9 6 4V16C6 17.1 6.9 18 8 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2M18 10H15V13H13V10H10V8H13V5H15V8H18V10Z"/></svg>
+                </button>
+                <button id="show-planner-btn" class="btn-icon" title="Planificateur d'entraînement">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H18V1H16V3H8V1H6V3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3M19 19H5V9H19V19M19 7H5V5H19V7M7 11H12V16H7V11Z"/></svg>
+                </button>
+                
+                <button id="toggle-settings-btn" class="btn-icon" title="Paramètres">
+                    <svg viewBox="0 0 24 24"><path d="M19.4 12.3c.1-.3.1-.5.1-.8s0-.5-.1-.8l2.1-1.7c.2-.1.2-.4.1-.6l-2-3.5c-.1-.2-.4-.3-.6-.2l-2.5 1c-.5-.4-.9-.7-1.4-1l-.4-2.7c0-.2-.2-.4-.5-.4h-4c-.3 0-.5.2-.5.4l-.4 2.7c-.5.3-1 .6-1.4 1l-2.5-1c-.2-.1-.5 0-.6.2l-2 3.5c-.1.2-.1.5.1.6l2.1 1.7c-.1.3-.1.5-.1.8s0 .5.1.8l-2.1 1.7c-.2.1-.2.4-.1.6l2 3.5c.1.2.4.3.6.2l2.5-1c.5.4.9.7 1.4 1l.4 2.7c0 .2.2.4.5.4h4c.3 0 .5-.2.5.4l.4-2.7c.5-.3 1-.6 1.4-1l2.5 1c.2.1.5 0 .6.2l2-3.5c.1-.2.1-.5-.1-.6l-2.1-1.7M12 15.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5Z"/></svg>
                 </button>
             </div>
         </div>
@@ -45,7 +52,24 @@
                 <div class="button-row">
                     <input type="file" id="import-file-input" class="hidden" accept=".json,application/json">
                     <button id="load-file-btn" title="Charger un playbook (.json)"><svg viewBox="0 0 24 24"><path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z" /></svg> Charger</button>
-                    <button id="save-file-btn" class="btn-primary" title="Sauvegarder le playbook (.json)"> <svg viewBox="0 0 24 24"><path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" /></svg> Sauvegarder</button>
+                    <button id="save-file-btn" title="Sauvegarder le playbook (.json)"> <svg viewBox="0 0 24 24"><path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" /></svg> Fichier</button>
+                </div>
+                
+                <div class="button-row" style="margin-top: 10px;">
+                    <button id="export-all-data-btn" class="btn-primary" style="width: 100%;" title="Sauvegarder tous vos playbooks, tags et plans dans un seul fichier de backup.">
+                        <svg viewBox="0 0 24 24"><path d="M21.5,13.3L20.8,15.9C20.6,16.8 19.8,17.5 18.9,17.5H5.1C4.2,17.5 3.4,16.8 3.2,15.9L2.5,13.3C2.2,12.3 2.8,11.2 3.8,10.9C4.8,10.6 5.9,11.2 6.2,12.2L6.9,14.8C7.1,15.3 7.5,15.5 8,15.5H16C16.5,15.5 16.9,15.3 17.1,14.8L17.8,12.2C18.1,11.2 19.2,10.6 20.2,10.9C21.2,11.2 21.8,12.3 21.5,13.3M19,2H5C3.9,2 3,2.9 3,4V9H5V4H19V9H21V4C21,2.9 20.1,2 19,2Z"/></svg>
+                        <span>Sauvegarder TOUT (Backup)</span>
+                    </button>
+                </div>
+                </div>
+
+            <div class="playbook-group">
+                <label>Bibliothèque</label>
+                <div class="button-row">
+                    <button id="save-to-library-btn" class="btn-primary" title="Sauvegarder dans la bibliothèque locale">
+                        <svg viewBox="0 0 24 24"><path d="M17 3H7C5.9 3 5 3.9 5 5V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V5C19 3.9 18.1 3 17 3M17 19H7V5H17V19M12 9L10 11H13V15H11V13L9 15L11 17V15H15V11H13L15 9H12Z"/></svg>
+                        Sauvegarder
+                    </button>
                 </div>
             </div>
 
@@ -63,6 +87,31 @@
         </div>
     </div>
     
+    <div id="settings-panel" class="floating-panel section-container hidden">
+        <div class="playbook-group">
+            <label>Thème</label>
+            <div class="settings-row">
+                <span>Mode sombre</span>
+                <button id="theme-toggle-btn" title="Changer le thème">
+                    <svg id="theme-icon-sun" viewBox="0 0 24 24"><path fill="currentColor" d="M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7z M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35,3-3S10.35,9,12,9z M2,12c0,0.55,0.45,1,1,1h1c0.55,0,1-0.45,1-1s-0.45-1-1-1H3C2.45,11,2,11.45,2,12z M19,11h-1c-0.55,0-1,0.45-1,1s0.45,1,1,1h1c0.55,0,1-0.45,1-1S19.55,11,19,11z M11,19v1c0,0.55,0.45,1,1,1s1-0.45,1-1v-1c0-0.55-0.45-1-1-1S11,18.45,11,19z M11,2v1c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M5.99,4.58c-0.39-0.39-1.02-0.39-1.41,0l-0.71,0.71c-0.39,0.39-0.39,1.02,0,1.41s1.02,0.39,1.41,0l0.71-0.71C6.38,5.61,6.38,4.97,5.99,4.58z M18.36,17.66c-0.39-0.39-1.02-0.39-1.41,0l-0.71,0.71c-0.39,0.39-0.39,1.02,0,1.41s1.02,0.39,1.41,0l0.71-0.71C18.75,18.68,18.75,18.05,18.36,17.66z M17.66,5.99c0.39-0.39,0.39-1.02,0-1.41l-0.71-0.71c-0.39-0.39-1.02-0.39-1.41,0s-0.39,1.02,0,1.41l0.71,0.71C16.63,6.38,17.27,6.38,17.66,5.99z M4.58,18.36c0.39-0.39,0.39-1.02,0-1.41l-0.71-0.71c-0.39-0.39-1.02-0.39-1.41,0s-0.39,1.02,0,1.41l0.71,0.71C3.56,18.75,4.19,18.75,4.58,18.36z"/></svg>
+                    <svg id="theme-icon-moon" class="hidden" viewBox="0 0 24 24"><path fill="currentColor" d="M12.3,4.9C10.9,4.4,9.4,4.5,8.1,5.2c-1.4,0.7-2.5,1.9-3.2,3.4c-0.7,1.5-0.7,3.2-0.1,4.8c0.6,1.6,1.8,2.9,3.3,3.7c1.5,0.8,3.2,0.9,4.7,0.4c1.5-0.5,2.8-1.5,3.6-2.9c0.8-1.4,1.1-3,0.7-4.5c-0.4-1.5-1.3-2.8-2.5-3.8C14,5.2,13.2,5,12.3,4.9z"/></svg>
+                </button>
+            </div>
+        </div>
+        <div class="playbook-group">
+            <label>Aide</label>
+            <div class="settings-row full-width">
+                <button id="show-help-btn" class="btn-full-width" title="Ouvrir le guide d'utilisation">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8m-1-14h2v2h-2V6m0 4h2v6h-2v-6Z"/></svg>
+                    <span>Ouvrir l'aide</span>
+                </button>
+            </div>
+        </div>
+        <div class="playbook-group">
+            <label>Crédits</label>
+            <span class="creator-credit">Par Augier Flavien</span>
+        </div>
+    </div>
     <div class="main-content">
         <aside id="sidebar">
             <div id="properties-panel" class="section-container">
@@ -142,7 +191,7 @@
                         <button id="tool-select" class="tool-btn" title="Déplacer / Sélectionner"><svg viewBox="0 0 24 24"><path d="M13.62,19.33L12.1,22.45L10.59,19.33L7.47,17.82L10.59,16.3L12.1,13.18L13.62,16.3L16.74,17.82L13.62,19.33M5.5,3L4,6.5L7.5,8L4,9.5L5.5,13L9,11.5L12.5,13L11,9.5L14.5,8L11,6.5L9,3L5.5,3Z" /></svg></button>
                         <button id="tool-player" class="tool-btn" title="Ajouter Attaquant"><svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" /></svg></button>
                         <button id="tool-defender" class="tool-btn" title="Ajouter Défenseur"><svg viewBox="0 0 24 24"><path d="M12,1.75A6.25,6.25 0 0,0 5.75,8C5.75,10.87 7.91,13.28 10.7,13.84V16.2L7.2,17.6C6.7,17.8 6.5,18.4 6.7,18.9L7.6,20.8C7.8,21.3 8.4,21.5 8.9,21.3L12,20L15.1,21.3C15.6,21.5 16.2,21.3 16.4,20.8L17.3,18.9C17.5,18.4 17.3,17.8 16.8,17.6L13.3,16.2V13.84C16.09,13.28 18.25,10.87 18.25,8A6.25,6.25 0 0,0 12,1.75Z"/></svg></button>
-                        <button id="tool-ball" class="tool-btn" title="Ajouter Ballon"><svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M4.3,15.24L9.5,13.2L11,18.05L5.82,20.07C4.94,18.6 4.3,16.97 4.3,15.24M18.18,20.07L13,18.05L14.5,13.2L19.7,15.24C19.7,16.97 19.06,18.6 18.18,20.07M19.93,8.93L15.5,10.8L14.1,5.5C15.86,5.88 17.39,6.94 18.5,8.32C19.03,8.44 19.5,8.65 19.93,8.93M9.9,5.5L8.5,10.8L4.07,8.93C4.5,8.65 4.97,8.44 5.5,8.32C6.61,6.94 8.14,5.88 9.9,5.5M12,6.34C10.73,7.3 10.2,8.89 10.5,10.3L12,15L13.5,10.3C13.8,8.89 13.27,7.3 12,6.34Z"/></svg></button>
+                        <button id="tool-ball" class="tool-btn" title="Ajouter Ballon"><svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M4.3,15.24L9.5,13.2L11,18.05L5.82,20.07C4.94,18.6 4.3,16.97 4.3,15.24M18.18,20.07L13,18.05L14.5,13.2L19.7,15.24C19.7,16.97 19.06,18.6 18.18,20.07M19.93,8.93L15.5,10.8L14.1,5.5C15.86,5.88 17.39,6.94 18.5,8.32C19.03,8.44 19.5,8.65 19.93,8.93M9.9,5.5L8.5,10.8L4.07,8.93C4.5,8.65 4.97,8.44 5.5,8.32C6.61,6.94 8.14,5.88 9.9,5.5M12,6.34C10.73,7.3 10.2,8.89 10.5,10.3L12,15L13.5,10.3C13.8,8.89 13.27,7.3 12,6.34Z" /></svg></button>
                         <button id="tool-cone" class="tool-btn" title="Ajouter Plot"><svg viewBox="0 0 24 24"><path d="M12,2L2,22H22L12,2M12,6.5L17.5,17H6.5L12,6.5Z" /></svg></button>
                         <button id="tool-hoop" class="tool-btn" title="Ajouter Cerceau"><svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20Z" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
                         <button id="tool-basket" class="tool-btn" title="Ajouter Panier"><svg viewBox="0 0 24 24"><path d="M5,6H19A1,1 0 0,1 19,8H5A1,1 0 0,1 5,6M7,9L10,18H14L17,9H7Z" /></svg></button>
@@ -202,15 +251,162 @@
             </button>
             <span id="anim-time-display">0.0s / 0.0s</span>
             <button id="anim-close-btn" title="Fermer">
-                <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>
+                <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
             </button>
         </div>
     </div>
 
+    <div id="library-view" class="fullscreen-view hidden">
+        <header class="view-header">
+            <h2>Bibliothèque de Playbooks</h2>
+            <button id="library-close-btn" class="view-close-btn danger" title="Fermer">
+                <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
+            </button>
+        </header>
+        <div class="view-content">
+            
+            <div class="library-controls">
+                <div id="library-filters" class="filter-bar">
+                    </div>
+                <button id="btn-manage-tags" class="btn-primary" title="Gérer les tags">
+                    <svg viewBox="0 0 24 24"><path d="M5.5,7A1.5,1.5 0 0,0 7,5.5A1.5,1.5 0 0,0 5.5,4A1.5,1.5 0 0,0 4,5.5A1.5,1.5 0 0,0 5.5,7M21.4,11.6L20.7,14.4C20.4,15.8 19.2,16.8 17.8,16.8H17.2L12.8,21.2C12.4,21.6 11.7,21.8 11.1,21.6C10.5,21.4 10,20.9 9.8,20.3L9.1,18H4C2.9,18 2,17.1 2,16V4C2,2.9 2.9,2 4,2H16C17.1,2 18,2.9 18,4V10.3L20.8,10.6C21.6,10.7 22.1,11.3 21.9,12.1L21.4,11.6M16,4H4V16H9.4L13.2,19.8L16.8,16.2C17,16.1 17.2,16 17.3,16H18.9L19.4,12H18V10C18,8.9 17.1,8 16,8H15V6C15,4.9 14.1,4 13,4H10V6H13V8H10V10H16V4Z"/></svg>
+                    <span>Gérer les tags</span>
+                </button>
+            </div>
+
+            <p class="library-warning">
+                <strong>Attention :</strong> Vos playbooks sont sauvegardés localement. Pensez à utiliser les boutons "Fichier" (pour exporter en .json) pour vos sauvegardes.
+            </p>
+            
+            <div id="library-grid"></div>
+
+        </div>
+    </div>
+
+
+    <div id="manage-tags-modal" class="fullscreen-view hidden">
+        <header class="view-header">
+            <h2>Gérer les Tags</h2>
+            <button id="manage-tags-close-btn" class="view-close-btn danger" title="Fermer">
+                <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
+            </button>
+        </header>
+        <div class="view-content" style="max-width: 500px; margin: 0 auto; width: 100%;">
+            <div class="playbook-group">
+                <label for="new-tag-name-input">Nom du nouveau tag</label>
+                <div class="button-row">
+                    <input type="text" id="new-tag-name-input" placeholder="Ex: Attaque rapide" style="flex-grow: 1;">
+                    <button id="btn-add-new-tag" class="btn-primary" style="min-width: 100px;">Ajouter</button>
+                </div>
+            </div>
+            
+            <div class="playbook-group" style="margin-top: 20px;">
+                <label>Tags existants</label>
+                <ul id="master-tag-list" class="tag-management-list">
+                    </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="assign-tags-modal" class="fullscreen-view hidden">
+        <header class="view-header">
+            <h2 id="assign-tags-title">Assigner les tags pour : ...</h2>
+            <button id="assign-tags-close-btn" class="view-close-btn danger" title="Fermer">
+                <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
+            </button>
+        </header>
+        <div class="view-content" style="max-width: 500px; margin: 0 auto; width: 100%;">
+            <div id="assign-tags-list" class="tag-assign-list">
+                </div>
+            <button id="btn-save-tag-assignment" class="btn-primary" style="width: 100%; margin-top: 20px; height: 45px;">
+                Enregistrer les modifications
+            </button>
+        </div>
+    </div>
+    
+    <div id="planner-view" class="fullscreen-view hidden">
+        <header class="view-header">
+            <h2>Planificateur d'Entraînement</h2>
+            <button id="planner-close-btn" class="view-close-btn danger" title="Fermer">
+                <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
+            </button>
+        </header>
+        <div class="view-content">
+            <div id="planner-grid">
+                </div>
+        </div>
+    </div>
+    
+    <div id="help-view" class="fullscreen-view hidden">
+        <header class="view-header">
+            <h2>Aide & Prise en main</h2>
+            <button id="help-close-btn" class="view-close-btn danger" title="Fermer">
+                <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
+                </button>
+        </header>
+        <div class="view-content help-content">
+            </div>
+    </div>
+
+
+    <div id="plan-editor-modal" class="hidden">
+        <div id="plan-editor-content">
+            <header id="plan-editor-header">
+                <h3 id="plan-editor-title">Créer un nouveau plan</h3>
+                <button id="plan-editor-close-btn" class="view-close-btn danger" title="Fermer">
+                    <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
+                </button>
+            </header>
+
+            <div id="plan-editor-body">
+                <main id="plan-editor-main">
+                    <input type="hidden" id="plan-editor-id" value="">
+                    
+                    <div class="plan-editor-group">
+                        <label for="plan-editor-name">Nom du Plan d'Entraînement</label>
+                        <input type="text" id="plan-editor-name" placeholder="Ex: Échauffement U15">
+                    </div>
+                    
+                    <div class="plan-editor-group">
+                        <label for="plan-editor-notes">Notes / Objectifs</label>
+                        <textarea id="plan-editor-notes" placeholder="Objectifs de la séance, points clés, etc."></textarea>
+                    </div>
+
+                    <div class="plan-editor-group">
+                        <label>Exercices Inclus</label>
+                        <ul id="plan-playbooks-list">
+                            <li class="plan-editor-empty-list">Ajoutez des exercices depuis la bibliothèque de droite.</li>
+                        </ul>
+                    </div>
+                </main>
+
+                <aside id="plan-editor-playbook-selector">
+                    <h4>Ajouter depuis la Bibliothèque</h4>
+                    
+                    <div id="plan-selector-filters" class="filter-bar">
+                        </div>
+                    
+                    <input type="text" id="plan-selector-search" placeholder="Rechercher un exercice...">
+                    <div id="plan-selector-list">
+                        </div>
+                </aside>
+            </div>
+
+            <footer id="plan-editor-footer">
+                <button id="plan-editor-cancel-btn" class="danger">Annuler</button>
+                <button id="plan-editor-save-btn">Sauvegarder le Plan</button>
+            </footer>
+        </div>
+    </div>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/ccapture.js@1.1.0/build/CCapture.all.min.js"></script>
     
+    <script src="db.js"></script>
+    <script src="manager.js"></script>
+    <script src="planner.js"></script>
     <script src="script.js"></script>
+
 </body>
 </html>
