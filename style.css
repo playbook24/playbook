@@ -662,3 +662,53 @@ body.dark-mode .prop-info {
         }
     }
 }
+
+/* --- NOUVEAU : Styles pour la fenêtre d'Aide --- */
+.help-content {
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    padding-bottom: 50px;
+}
+.help-content h3 {
+    font-family: var(--font-title);
+    font-size: 1.4em;
+    color: var(--color-secondary);
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 5px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+}
+.help-content p {
+    font-size: 1em;
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+.help-content ul {
+    padding-left: 25px;
+    margin-bottom: 15px;
+}
+.help-content li {
+    margin-bottom: 10px;
+}
+.help-content li strong {
+    color: var(--color-secondary);
+}
+.help-content code {
+    background-color: var(--color-border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+body.dark-mode .help-content h3 {
+    color: var(--color-primary);
+}
+body.dark-mode .help-content li strong {
+    color: var(--color-text-on-dark);
+}
+body.dark-mode .help-content code {
+    background-color: #333;
+    color: #f5f5f5;
+}
+/* --- Fin des styles d'Aide --- */
