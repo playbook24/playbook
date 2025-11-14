@@ -32,6 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
+    // --- CORRECTION v4.5 ---
+    // Ajout d'une variable pour suivre l'ID du playbook chargé
+    let currentLoadedPlaybookId = null; 
+    // --- FIN CORRECTION ---
+    
     let history = [];
     let redoStack = [];
     let isRestoringState = false;
@@ -895,6 +900,11 @@ document.addEventListener('DOMContentLoaded', () => {
             playerCounter = 1;
             defenderCounter = 1;
             selectedElement = null;
+            
+            // --- CORRECTION v4.5 ---
+            currentLoadedPlaybookId = null; // Effacer réinitialise le playbook
+            // --- FIN CORRECTION ---
+            
             commitState();
             updatePropertiesPanel();
             redrawCanvas();
@@ -1077,6 +1087,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     playNameInput.value = playbookState.name;
                     updateCountersFromPlaybook();
+                    
+                    // --- CORRECTION v4.5 ---
+                    currentLoadedPlaybookId = null; // Un fichier importé est un nouveau playbook
+                    // --- FIN CORRECTION ---
+                    
                     switchToScene(0);
                     playbookManagerContainer.classList.add('hidden');
                     alert('Playbook importé avec succès !');
@@ -1112,39 +1127,65 @@ document.addEventListener('DOMContentLoaded', () => {
         event.target.value = ''; // Permet de re-uploader le même fichier
     });
     
-    // --- NOUVEAU : FONCTION D'EXPORT TOTAL ---
+    // ---
+    // --- FONCTION D'EXPORT TOTAL (CORRIGÉE POUR LES BLOBS) ---
+    // ---
     exportAllDataBtn.addEventListener('click', async () => {
         const button = exportAllDataBtn;
         button.disabled = true;
         button.textContent = 'Préparation...';
 
+        // Fonction d'aide pour convertir un Blob en DataURL (base64)
+        const blobToDataURL = (blob) => {
+            return new Promise((resolve, reject) => {
+                // Vérifie si c'est bien un Blob
+                if (!(blob instanceof Blob)) {
+                    resolve(null); // Si ce n'est pas un blob (ex: null ou déjà corrompu), on renvoie null
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e.target.error);
+                reader.readAsDataURL(blob);
+            });
+        };
+
         try {
-            // 1. Récupérer toutes les données de la base de données
+            // 1. Récupérer toutes les données
             const playbooks = await orbDB.getAllPlaybooks();
             const tags = await orbDB.getAllTags();
             const plans = await orbDB.getAllPlans();
 
-            // 2. Créer un objet "backup"
+            // 2. Convertir les aperçus (Blob) des playbooks en base64
+            const serializablePlaybooks = await Promise.all(
+                playbooks.map(async (pb) => {
+                    const previewDataUrl = await blobToDataURL(pb.preview);
+                    // Remplace le Blob par la chaîne de caractères base64
+                    return { ...pb, preview: previewDataUrl }; 
+                })
+            );
+
+            // 3. Créer un objet "backup" avec les playbooks sérialisables
             const allData = {
                 version: "orb_backup_v1",
                 createdAt: new Date().toISOString(),
                 data: {
-                    playbooks: playbooks,
+                    playbooks: serializablePlaybooks, // Utilise les playbooks corrigés
                     tags: tags,
                     trainingPlans: plans
                 }
             };
 
-            // 3. Convertir en JSON
+            // 4. Convertir en JSON
             const jsonString = JSON.stringify(allData, null, 2);
             const blob = new Blob([jsonString], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             
-            // 4. Créer un nom de fichier avec la date
+            // 5. Créer un nom de fichier avec la date
             const date = new Date().toISOString().split('T')[0]; // Format AAAA-MM-JJ
             const fileName = `orb_backup_${date}.json`;
 
-            // 5. Créer le lien de téléchargement
+            // 6. Créer le lien de téléchargement
             const a = document.createElement('a');
             a.href = url;
             a.download = fileName;
@@ -1347,6 +1388,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const newIndex = playbookState.activeSceneIndex + 1;
         newScene.name = `Scène ${playbookState.scenes.length + 1}`;
         playbookState.scenes.splice(newIndex, 0, newScene);
+        
+        // --- CORRECTION v4.5 ---
+        currentLoadedPlaybookId = null; // Modifier un playbook le "détache" de son original
+        // --- FIN CORRECTION ---
+        
         commitState();
         switchToScene(newIndex);
     });
@@ -1358,6 +1404,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm(`Voulez-vous vraiment supprimer la scène "${playbookState.scenes[playbookState.activeSceneIndex].name}" ?`)) {
             playbookState.scenes.splice(playbookState.activeSceneIndex, 1);
             const newIndex = Math.min(playbookState.activeSceneIndex, playbookState.scenes.length - 1);
+            
+            // --- CORRECTION v4.5 ---
+            currentLoadedPlaybookId = null; // Modifier un playbook le "détache" de son original
+            // --- FIN CORRECTION ---
+            
             commitState();
             switchToScene(newIndex);
         }
@@ -1435,6 +1486,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const newIndex = playbookState.activeSceneIndex + 1;
         newScene.name = `Scène ${playbookState.scenes.length + 1}`;
         playbookState.scenes.splice(newIndex, 0, newScene);
+        
+        // --- CORRECTION v4.5 ---
+        currentLoadedPlaybookId = null; // Modifier un playbook le "détache" de son original
+        // --- FIN CORRECTION ---
+        
         commitState();
         switchToScene(newIndex);
     });
@@ -2144,6 +2200,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- CORRECTION v4.5 ---
+    // Logique de sauvegarde mise à jour pour utiliser "currentLoadedPlaybookId"
     saveToLibraryBtn.addEventListener('click', async () => {
         const button = saveToLibraryBtn;
         button.disabled = true;
@@ -2157,10 +2215,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             playbookState.name = playNameInput.value || 'Playbook sans nom';
             
-            // Appelle la fonction de sauvegarde. db.js s'occupe d'initialiser tagIds.
-            const newId = await orbDB.savePlaybook(playbookState, previewBlob, null);
+            // Si "currentLoadedPlaybookId" a un ID, db.js fera une mise à jour.
+            // Si c'est "null", db.js créera une nouvelle entrée.
+            const idToSave = currentLoadedPlaybookId;
+            
+            const newId = await orbDB.savePlaybook(playbookState, previewBlob, idToSave);
+            
+            // On met à jour l'ID actuel avec celui qui vient d'être sauvegardé
+            currentLoadedPlaybookId = newId; 
             
             alert(`Playbook "${playbookState.name}" sauvegardé avec succès !`);
+            
+            // Rafraîchir la bibliothèque si elle est ouverte
+            const libraryView = document.getElementById('library-view');
+            if (!libraryView.classList.contains('hidden') && typeof initManager === 'function') {
+                // On ne peut pas appeler loadLibrary() d'ici, mais on peut re-cliquer sur le bouton
+                // C'est un peu un hack, mais ça force le rechargement
+                document.getElementById('show-library-btn').click();
+            }
 
         } catch (error) {
             console.error("Erreur lors de la sauvegarde dans la bibliothèque:", error);
@@ -2171,11 +2243,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- CORRECTION v4.5 ---
+    // Réception de l'enregistrement complet (avec ID)
     function loadPlaybookFromEvent(event) {
-        const playbookData = event.detail;
+        const playbookRecord = event.detail; // Reçoit l'enregistrement complet
         try {
-            if (playbookData && playbookData.scenes) {
-                playbookState = JSON.parse(JSON.stringify(playbookData));
+            if (playbookRecord && playbookRecord.playbookData && playbookRecord.playbookData.scenes) {
+                
+                playbookState = JSON.parse(JSON.stringify(playbookRecord.playbookData));
+                currentLoadedPlaybookId = playbookRecord.id; // Stocke l'ID
                 
                 history = [];
                 redoStack = [];
