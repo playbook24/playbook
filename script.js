@@ -1,4 +1,7 @@
-window.onload = function() {
+// NOTE : 'window.onload' est remplacé par 'DOMContentLoaded' pour plus de rapidité
+// et pour éviter les conflits si 'window.onload' est déjà utilisé.
+document.addEventListener('DOMContentLoaded', () => {
+    
     // --- Initialisation ---
     const canvas = document.getElementById('basketball-court');
     const ctx = canvas.getContext('2d');
@@ -9,7 +12,6 @@ window.onload = function() {
     const LOGICAL_HEIGHT = 150;
     const PROXIMITY_THRESHOLD = 20;
     
-    // Valeurs par défaut pour l'animation
     const DEFAULT_ANIMATION_SPEED = 50;
     const DEFAULT_ANTICIPATION_RATIO = 0.3;
     const MIN_SCENE_DURATION = 1000;
@@ -56,10 +58,20 @@ window.onload = function() {
 
     // --- Références au DOM ---
     const body = document.body;
+    
     const togglePlaybookManagerBtn = document.getElementById('toggle-playbook-manager-btn');
     const playbookManagerContainer = document.getElementById('play-manager-container');
+    
+    const toggleSettingsBtn = document.getElementById('toggle-settings-btn');
+    const settingsPanel = document.getElementById('settings-panel');
+    
+    const showHelpBtn = document.getElementById('show-help-btn');
+    const helpView = document.getElementById('help-view');
+    const helpCloseBtn = document.getElementById('help-close-btn');
+
     const viewFullCourtBtn = document.getElementById('view-full-court-btn');
     const viewHalfCourtBtn = document.getElementById('view-half-court-btn');
+    
     const propertiesPanel = document.getElementById('properties-panel');
     const noPropsMessage = document.getElementById('no-props-message');
     const allPropGroups = {
@@ -74,17 +86,21 @@ window.onload = function() {
         text: { group: document.getElementById('text-props'), content: document.getElementById('text-content-input'), color: document.getElementById('text-color-input'), size: document.getElementById('text-size-input') },
         path: { group: document.getElementById('path-props'), color: document.getElementById('path-color-input'), width: document.getElementById('path-width-input') }
     };
+    
     const addSceneBtn = document.getElementById('add-scene-btn'),
         animateSceneBtn = document.getElementById('animate-scene-btn'),
         deleteSceneBtn = document.getElementById('delete-scene-btn'),
         sceneList = document.getElementById('scene-list'),
         commentsTextarea = document.getElementById('comments-textarea');
+    
     const playNameInput = document.getElementById('play-name-input'),
         saveFileBtn = document.getElementById('save-file-btn'),
         loadFileBtn = document.getElementById('load-file-btn'),
         importFileInput = document.getElementById('import-file-input'),
+        saveToLibraryBtn = document.getElementById('save-to-library-btn'), 
         exportPdfBtn = document.getElementById('export-pdf-btn'),
-        exportVideoBtn = document.getElementById('export-video-btn');
+        exportVideoBtn = document.getElementById('export-video-btn'),
+        exportAllDataBtn = document.getElementById('export-all-data-btn');
     
     const undoBtn = document.getElementById('action-undo');
     const redoBtn = document.getElementById('action-redo');
@@ -99,6 +115,7 @@ window.onload = function() {
     const animIconPause = document.getElementById('anim-icon-pause');
     const animCloseBtn = document.getElementById('anim-close-btn');
     const animTimeDisplay = document.getElementById('anim-time-display');
+    
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     const themeIconSun = document.getElementById('theme-icon-sun');
     const themeIconMoon = document.getElementById('theme-icon-moon');
@@ -118,21 +135,50 @@ window.onload = function() {
     };
     const PASS_RATIO = 0.5;
 
-    // --- GESTION DU PANNEAU FLOTTANT PLAYBOOK ---
+    // --- GESTION DES PANNEAUX FLOTTANTS (Playbook & Settings) ---
+    
+    function toggleFloatingPanel(panel, button) {
+        const isOpening = panel.classList.contains('hidden');
+        document.querySelectorAll('.floating-panel').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.header-left button, .header-right .btn-icon').forEach(b => b.classList.remove('active'));
+        if (isOpening) {
+            panel.classList.remove('hidden');
+            button.classList.add('active');
+        }
+    }
+
     togglePlaybookManagerBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        playbookManagerContainer.classList.toggle('hidden');
-        togglePlaybookManagerBtn.classList.toggle('active', !playbookManagerContainer.classList.contains('hidden'));
+        toggleFloatingPanel(playbookManagerContainer, togglePlaybookManagerBtn);
+    });
+
+    toggleSettingsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleFloatingPanel(settingsPanel, toggleSettingsBtn);
     });
 
     window.addEventListener('click', (e) => {
-        const isPanelOpen = !playbookManagerContainer.classList.contains('hidden');
-        if (isPanelOpen && !playbookManagerContainer.contains(e.target) && !togglePlaybookManagerBtn.contains(e.target)) {
-            playbookManagerContainer.classList.add('hidden');
-            togglePlaybookManagerBtn.classList.remove('active');
+        const activeFloatingPanel = document.querySelector('.floating-panel:not(.hidden)');
+        if (activeFloatingPanel) {
+            const button = activeFloatingPanel.id.includes('play-manager') ? togglePlaybookManagerBtn : toggleSettingsBtn;
+            if (!activeFloatingPanel.contains(e.target) && !button.contains(e.target)) {
+                activeFloatingPanel.classList.add('hidden');
+                button.classList.remove('active');
+            }
         }
     });
-    // --- FIN GESTION PANNEAU ---
+    // --- FIN GESTION PANNEAUX FLOTTANTS ---
+    
+    
+    // --- GESTION VUE AIDE ---
+    showHelpBtn.addEventListener('click', () => {
+        helpView.classList.remove('hidden');
+    });
+    helpCloseBtn.addEventListener('click', () => {
+        helpView.classList.add('hidden');
+    });
+    // --- FIN GESTION VUE AIDE ---
+
 
     function commitState() {
         if (isRestoringState) return;
@@ -219,9 +265,7 @@ window.onload = function() {
         
         let hasBall = false;
         if (animParams.isAnimating) {
-            // NOUVEAU : Gérer une liste de passes
             if(animParams.passData && animParams.passData.length > 0) {
-                // Le joueur a le ballon s'il est un passeur qui n'a pas encore lancé, ou un receveur qui a attrapé.
                 hasBall = animParams.passData.some(pass => 
                     (pass.passerId === options.id && animParams.rawProgress < PASS_RATIO) ||
                     (pass.receiverId === options.id && animParams.rawProgress >= PASS_RATIO)
@@ -805,13 +849,12 @@ window.onload = function() {
         } else if ((e.key === "Delete" || e.key === "Backspace") && selectedElement) {
             let elements = playbookState.scenes[playbookState.activeSceneIndex].elements;
             if (selectedElement.type === 'player') {
-                // MODIFICATION : Détache tous les ballons de ce joueur
                 const balls = elements.filter(b => b.type === 'ball' && b.linkedTo === selectedElement.id);
                 balls.forEach(ball => ball.linkedTo = null);
             }
             playbookState.scenes[playbookState.activeSceneIndex].elements = elements.filter(el => el.id !== selectedElement.id);
             selectedElement = null;
-            selectedScene = playbookState.scenes[playbookState.activeSceneIndex]; // Reselect current scene
+            selectedScene = playbookState.scenes[playbookState.activeSceneIndex];
             commitState();
             updatePropertiesPanel();
             redrawCanvas();
@@ -832,7 +875,6 @@ window.onload = function() {
 
     document.querySelectorAll(".tool-btn").forEach(button => {
         button.addEventListener("click", () => {
-            // Ne pas désélectionner les boutons de vue
             if(!button.classList.contains('view-btn')) {
                 finalizeCurrentPath();
                 document.querySelectorAll(".tool-btn:not(.view-btn)").forEach(btn => btn.classList.remove("active"));
@@ -1004,6 +1046,7 @@ window.onload = function() {
         importFileInput.click();
     });
 
+    // --- MODIFIÉ POUR GÉRER L'IMPORT DE BACKUP ---
     importFileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -1012,7 +1055,10 @@ window.onload = function() {
         reader.onload = (e) => {
             try {
                 const importedData = JSON.parse(e.target.result);
+                
                 if (importedData && importedData.scenes) {
+                    // --- C'est un playbook simple (Ancienne logique) ---
+                    
                     playbookState = importedData;
                     if (!playbookState.name) playbookState.name = 'Playbook importé';
                     if (!playbookState.animationSettings) {
@@ -1034,19 +1080,98 @@ window.onload = function() {
                     switchToScene(0);
                     playbookManagerContainer.classList.add('hidden');
                     alert('Playbook importé avec succès !');
+
+                } else if (importedData && importedData.version === "orb_backup_v1") {
+                    // --- NOUVEAU : C'est un fichier de backup ---
+                    if (confirm("ATTENTION !\n\nVous êtes sur le point de charger un fichier de backup. Cela effacera TOUTES les données actuelles (playbooks, tags, plans) et les remplacera par le contenu de ce fichier.\n\nÊtes-vous sûr de vouloir continuer ?")) {
+                        
+                        // On utilise une fonction async auto-appelante pour utiliser await
+                        (async () => {
+                            try {
+                                await orbDB.importBackupData(importedData.data);
+                                alert("Backup importé avec succès ! L'application va se recharger.");
+                                // Forcer un rechargement complet pour que tout soit propre
+                                window.location.reload(); 
+                            } catch (importError) {
+                                console.error("Erreur lors de l'importation du backup:", importError);
+                                alert("Erreur critique : L'importation du backup a échoué. Vos données n'ont pas été modifiées.");
+                            }
+                        })(); // Exécute la fonction async
+                    }
+                
                 } else {
                     alert('Erreur : Fichier JSON non valide ou format incorrect.');
                 }
+
             } catch (error) {
                 console.error("Erreur d'importation:", error);
                 alert("Erreur : Le fichier est invalide.");
             }
         };
         reader.readAsText(file);
-        event.target.value = '';
+        event.target.value = ''; // Permet de re-uploader le même fichier
     });
     
+    // --- NOUVEAU : FONCTION D'EXPORT TOTAL ---
+    exportAllDataBtn.addEventListener('click', async () => {
+        const button = exportAllDataBtn;
+        button.disabled = true;
+        button.textContent = 'Préparation...';
+
+        try {
+            // 1. Récupérer toutes les données de la base de données
+            const playbooks = await orbDB.getAllPlaybooks();
+            const tags = await orbDB.getAllTags();
+            const plans = await orbDB.getAllPlans();
+
+            // 2. Créer un objet "backup"
+            const allData = {
+                version: "orb_backup_v1",
+                createdAt: new Date().toISOString(),
+                data: {
+                    playbooks: playbooks,
+                    tags: tags,
+                    trainingPlans: plans
+                }
+            };
+
+            // 3. Convertir en JSON
+            const jsonString = JSON.stringify(allData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            // 4. Créer un nom de fichier avec la date
+            const date = new Date().toISOString().split('T')[0]; // Format AAAA-MM-JJ
+            const fileName = `orb_backup_${date}.json`;
+
+            // 5. Créer le lien de téléchargement
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error("Erreur lors de l'export total:", error);
+            alert("Erreur : Impossible de générer le fichier de backup.");
+        } finally {
+            button.disabled = false;
+            // Rétablit le contenu original du bouton
+            button.innerHTML = `
+                <svg viewBox="0 0 24 24"><path d="M21.5,13.3L20.8,15.9C20.6,16.8 19.8,17.5 18.9,17.5H5.1C4.2,17.5 3.4,16.8 3.2,15.9L2.5,13.3C2.2,12.3 2.8,11.2 3.8,10.9C4.8,10.6 5.9,11.2 6.2,12.2L6.9,14.8C7.1,15.3 7.5,15.5 8,15.5H16C16.5,15.5 16.9,15.3 17.1,14.8L17.8,12.2C18.1,11.2 19.2,10.6 20.2,10.9C21.2,11.2 21.8,12.3 21.5,13.3M19,2H5C3.9,2 3,2.9 3,4V9H5V4H19V9H21V4C21,2.9 20.1,2 19,2Z"/></svg>
+                <span>Sauvegarder TOUT (Backup)</span>
+            `;
+        }
+    });
+
     exportPdfBtn.addEventListener("click", async () => {
+        if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
+            alert("Erreur: Les bibliothèques PDF n'ont pas pu être chargées.");
+            return;
+        }
+
         const { jsPDF } = window.jspdf;
         const originalSceneIndex = playbookState.activeSceneIndex;
         const courtContainer = document.getElementById("court-container");
@@ -1103,7 +1228,6 @@ window.onload = function() {
             await switchToScene(i, true); 
             await new Promise(resolve => setTimeout(resolve, 50));
 
-            // MODIFICATION 1 : Réduction du scale pour alléger l'image
             const courtImage = await html2canvas(courtContainer, { scale: 1.5, backgroundColor: null });
 
             const cellWidth = (PAGE_WIDTH - MARGIN * (layoutConfig.cols + 1)) / layoutConfig.cols;
@@ -1125,8 +1249,7 @@ window.onload = function() {
             const diagramHeightRatio = 0.6;
             const diagramContainerHeight = cellHeight * diagramHeightRatio;
 
-            // MODIFICATION 2 : Conversion en JPEG avec compression et ajout au PDF
-            const imgData = courtImage.toDataURL("image/jpeg", 0.8); // 0.8 = 80% de qualité
+            const imgData = courtImage.toDataURL("image/jpeg", 0.8); 
             const imgHeight = Math.min(diagramContainerHeight - 5, courtImage.height * cellWidth / courtImage.width);
             const imgWidth = courtImage.width * imgHeight / courtImage.height;
             doc.addImage(imgData, "JPEG", cellX, cellY + 5, imgWidth, imgHeight, undefined, 'FAST');
@@ -1157,6 +1280,7 @@ window.onload = function() {
         doc.save(`${playName}.pdf`);
         await switchToScene(originalSceneIndex);
     });
+    
     function updateSceneListUI() {
         sceneList.innerHTML = "";
         playbookState.scenes.forEach((scene, index) => {
@@ -1276,12 +1400,11 @@ window.onload = function() {
             }
         });
         
-        // MODIFICATION : Gérer plusieurs passes
         const passPaths = currentScene.elements.filter(el => el.type === 'pass');
         const originalBalls = currentScene.elements.filter(el => el.type === 'ball');
 
         originalBalls.forEach(originalBall => {
-            if (!originalBall.linkedTo) return; // Le ballon doit avoir un passeur
+            if (!originalBall.linkedTo) return; 
 
             const passer = originalPlayers.find(p => p.id === originalBall.linkedTo);
             if (!passer) return;
@@ -1373,7 +1496,6 @@ window.onload = function() {
             const endScene = playbookState.scenes[i + 1];
             const transition = {
                 duration: MIN_SCENE_DURATION,
-                // MODIFICATION : passData est maintenant un tableau
                 passData: [], 
                 passPathData: [],
                 tweens: []
@@ -1382,12 +1504,10 @@ window.onload = function() {
             const startElementsMap = new Map(startScene.elements.map(e => [e.id, e]));
             const endElementsMap = new Map(endScene.elements.map(e => [e.id, e]));
             
-            // MODIFICATION : On cherche TOUS les ballons
             const startBalls = startScene.elements.filter(e => e.type === 'ball');
             
             startBalls.forEach(startBall => {
                 const endBall = endElementsMap.get(startBall.id);
-                // Si un ballon a changé de joueur attaché, c'est une passe
                 if (endBall && startBall.linkedTo && endBall.linkedTo && startBall.linkedTo !== endBall.linkedTo) {
                     const passInfo = {
                         passerId: startBall.linkedTo,
@@ -1459,7 +1579,6 @@ window.onload = function() {
             } else {
                 const movementDuration = (maxMovementLength / (playbookState.animationSettings.speed || DEFAULT_ANIMATION_SPEED)) * 1000;
                 const finalDuration = Math.max(MIN_SCENE_DURATION, movementDuration);
-                // La durée de la transition est dictée par la plus longue des actions (mouvement ou passe)
                 transition.duration = transition.passData.length > 0 ? Math.max(finalDuration, PASS_DURATION) : finalDuration;
             }
 
@@ -1594,7 +1713,6 @@ window.onload = function() {
         };
 
         transition.tweens.forEach(tween => drawAnimatedPath({points: tween.movementPath, type: tween.pathType, color: tween.pathColor, width: tween.pathWidth}));
-        // MODIFICATION : On dessine tous les tracés de passe
         transition.passPathData.forEach(drawAnimatedPath);
 
         p_ctx.restore();
@@ -1627,14 +1745,12 @@ window.onload = function() {
             }
             
             const drawFn = { player: drawPlayer, defender: drawDefender, ball: drawBall, cone: drawCone, hoop: drawHoop, basket: drawBasket, text: drawText }[tween.type];
-            // MODIFICATION : On ne dessine pas les ballons qui sont en pleine passe ici
             if (drawFn && !(tween.type === 'ball' && tween.linkedTo)) {
                 const options = { ...tween, rotation };
                 drawFn(currentPos.x, currentPos.y, false, options, p_ctx, getCoordsWithRect, { isAnimating: true, rawProgress, sceneIndex: currentSceneIndex, passData: transition.passData });
             }
         });
 
-        // MODIFICATION : Boucle sur chaque passe pour l'animer
         if (passData && passData.length > 0) {
             const passProgress = Math.min(easedMovementProgress / PASS_RATIO, 1.0);
 
@@ -1646,7 +1762,6 @@ window.onload = function() {
                     const passerPos = getPointOnPath(passerTween.movementPath, easedMovementProgress) || { x: passerTween.startX + (passerTween.endX - passerTween.startX) * easedMovementProgress, y: passerTween.startY + (passerTween.endY - passerTween.startY) * easedMovementProgress };
                     const receiverPos = getPointOnPath(receiverTween.movementPath, easedMovementProgress) || { x: receiverTween.startX + (receiverTween.endX - receiverTween.startX) * easedMovementProgress, y: receiverTween.startY + (receiverTween.endY - receiverTween.startY) * easedMovementProgress };
 
-                    // Si la passe n'est pas terminée, on dessine le ballon en mouvement
                     if (easedMovementProgress < PASS_RATIO) {
                         const ballX = passerPos.x + (receiverPos.x - passerPos.x) * passProgress;
                         const ballY = passerPos.y + (receiverPos.y - passerPos.y) * passProgress;
@@ -1660,6 +1775,11 @@ window.onload = function() {
     async function exportVideo() {
         if (playbookState.scenes.length < 2) {
             return alert("Veuillez créer au moins deux scènes pour une animation.");
+        }
+        
+        if (typeof window.CCapture === 'undefined') {
+            alert("Erreur: La bibliothèque d'export vidéo (CCapture.js) n'a pas pu être chargée.");
+            return;
         }
 
         const buttonElement = exportVideoBtn;
@@ -1937,7 +2057,27 @@ window.onload = function() {
         themeIconMoon.classList.toggle('hidden', !isDarkMode);
     }
 
-    function initializeApp() {
+    // --- CORRECTION MAJEURE : C'est le "boss" de l'application ---
+    async function initializeApp() {
+        
+        // 1. S'assurer que l'instance globale existe
+        if (typeof orbDB === 'undefined' || !orbDB) {
+            console.error("ERREUR FATALE : orbDB n'est pas défini. Vérifiez l'ordre de chargement des scripts.");
+            alert("Erreur critique au démarrage. Impossible de charger la base de données.");
+            return;
+        }
+        
+        // 2. Ouvrir la connexion UNE SEULE FOIS pour toute l'application
+        try {
+            await orbDB.open();
+            console.log("Base de données initialisée globalement.");
+        } catch (err) {
+            console.error("Impossible d'initialiser la base de données:", err);
+            alert("Erreur critique : la base de données locale n'a pas pu être chargée.");
+            return; // Stoppe le chargement de l'app si la DB échoue
+        }
+
+        // 3. Le reste de l'initialisation de l'interface
         const primaryColors = ['#d32f2f', '#007bff', '#28a745', '#ffc107', '#343a40', '#f8f9fa'];
         const zoneColors = ['#ffeb3b', '#8bc34a', '#2196f3', '#e91e63'];
         const coneColors = ['#ff7f50', '#ff4500', '#fca503', '#4682b4', '#333333'];
@@ -1962,6 +2102,19 @@ window.onload = function() {
         commitState();
         
         switchToScene(0);
+        
+        // 4. RÉVEILLER LES AUTRES MODULES
+        if (typeof initManager === 'function') {
+            initManager();
+        } else {
+            console.error("initManager n'est pas une fonction.");
+        }
+        
+        if (typeof initPlanner === 'function') {
+            initPlanner();
+        } else {
+            console.error("initPlanner n'est pas une fonction.");
+        }
     }
 
     themeToggleBtn.addEventListener('click', () => {
@@ -1970,5 +2123,87 @@ window.onload = function() {
         updateThemeUI(newTheme);
     });
 
-    setTimeout(initializeApp, 50);
-};
+    
+    // --- GESTION BIBLIOTHÈQUE (VERSION AVEC TAGS GÉRÉS) ---
+
+    async function generatePreviewBlob() {
+        // S'assure que html2canvas est chargé
+        if (typeof window.html2canvas === 'undefined') {
+            alert("Erreur: La bibliothèque de rendu (html2canvas) n'a pas pu être chargée.");
+            return null;
+        }
+        const courtContainer = document.getElementById("court-container");
+        try {
+            const canvas = await html2canvas(courtContainer, { scale: 1, backgroundColor: null });
+            return new Promise(resolve => {
+                canvas.toBlob(resolve, 'image/png', 0.9);
+            });
+        } catch (error) {
+            console.error("Erreur lors de la génération de l'aperçu:", error);
+            return null;
+        }
+    }
+
+    saveToLibraryBtn.addEventListener('click', async () => {
+        const button = saveToLibraryBtn;
+        button.disabled = true;
+        button.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" /></svg> Sauvegarde...';
+
+        try {
+            const previewBlob = await generatePreviewBlob();
+            if (!previewBlob) {
+                throw new Error("Impossible de générer l'aperçu.");
+            }
+
+            playbookState.name = playNameInput.value || 'Playbook sans nom';
+            
+            // Appelle la fonction de sauvegarde. db.js s'occupe d'initialiser tagIds.
+            const newId = await orbDB.savePlaybook(playbookState, previewBlob, null);
+            
+            alert(`Playbook "${playbookState.name}" sauvegardé avec succès !`);
+
+        } catch (error) {
+            console.error("Erreur lors de la sauvegarde dans la bibliothèque:", error);
+            alert("Erreur : Le playbook n'a pas pu être sauvegardé.");
+        } finally {
+            button.disabled = false;
+            button.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17 3H7C5.9 3 5 3.9 5 5V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V5C19 3.9 18.1 3 17 3M17 19H7V5H17V19M12 9L10 11H13V15H11V13L9 15L11 17V15H15V11H13L15 9H12Z"/></svg> Sauvegarder';
+        }
+    });
+
+    function loadPlaybookFromEvent(event) {
+        const playbookData = event.detail;
+        try {
+            if (playbookData && playbookData.scenes) {
+                playbookState = JSON.parse(JSON.stringify(playbookData));
+                
+                history = [];
+                redoStack = [];
+                isRestoringState = true; 
+                
+                commitState(); 
+                isRestoringState = false;
+                updateUndoRedoButtons(); 
+
+                playNameInput.value = playbookState.name;
+                updateCountersFromPlaybook();
+                switchToScene(0); 
+
+                playbookManagerContainer.classList.add('hidden');
+                togglePlaybookManagerBtn.classList.remove('active');
+                
+            } else {
+                throw new Error('Données de playbook invalides.');
+            }
+        } catch (error) {
+            console.error("Erreur lors du chargement du playbook:", error);
+            alert("Erreur : Le playbook n'a pas pu être chargé.");
+        }
+    };
+    
+    window.addEventListener('loadPlaybook', loadPlaybookFromEvent);
+    // --- FIN GESTION BIBLIOTHÈQUE ---
+
+    // Appelle la fonction d'initialisation principale
+    initializeApp();
+});
