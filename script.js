@@ -1210,6 +1210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- EXPORT PDF AVEC COULEURS DYNAMIQUES ---
     exportPdfBtn.addEventListener("click", async () => {
         if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
             alert("Erreur: Les bibliothèques PDF n'ont pas pu être chargées.");
@@ -1227,16 +1228,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const MARGIN = 15;
         const PAGE_WIDTH = doc.internal.pageSize.getWidth();
         const PAGE_HEIGHT = doc.internal.pageSize.getHeight();
-        const COLOR_PRIMARY = '#BFA98D';
-        const COLOR_SECONDARY = '#212121';
+        
+        // --- DÉTECTION DU MODE CRAB ---
+        const isCrab = document.body.classList.contains('crab-mode');
+        
+        // Couleurs dynamiques pour le PDF
+        const PDF_PRIMARY_COLOR = isCrab ? '#72243D' : '#BFA98D'; // Fond du header (Bordeaux ou Or)
+        const PDF_SECONDARY_COLOR = isCrab ? '#F9AB00' : '#212121'; // Lignes décoratives (Jaune ou Noir/Or)
+        // Le jaune sur papier blanc est très peu lisible, on garde le bordeaux pour le texte en mode Crab
+        const PDF_TEXT_COLOR = isCrab ? '#72243D' : '#212121'; 
+
         const COLOR_LIGHT_GREY = '#E0E0E0';
         
         const addHeader = (doc, title) => {
-            doc.setFillColor(COLOR_PRIMARY);
+            doc.setFillColor(PDF_PRIMARY_COLOR);
             doc.rect(0, 0, PAGE_WIDTH, MARGIN + 5, 'F');
             doc.setFontSize(20);
             doc.setFont("helvetica", "bold");
-            doc.setTextColor('#FFFFFF');
+            doc.setTextColor('#FFFFFF'); // Texte toujours blanc sur le bandeau de couleur
             doc.text(title, PAGE_WIDTH / 2, MARGIN, { align: "center" });
         };
 
@@ -1283,10 +1292,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             doc.setFontSize(12);
             doc.setFont("helvetica", "bold");
-            doc.setTextColor(COLOR_SECONDARY);
+            doc.setTextColor(PDF_TEXT_COLOR); // Utilisation de la couleur dynamique
             const sceneTitle = playbookState.scenes[i].name || `Scène ${i + 1}`;
             doc.text(sceneTitle, cellX, cellY);
-            doc.setDrawColor(COLOR_PRIMARY);
+            
+            doc.setDrawColor(isCrab ? PDF_SECONDARY_COLOR : PDF_PRIMARY_COLOR); // Ligne sous le titre
             doc.setLineWidth(0.5);
             doc.line(cellX, cellY + 1, cellX + 30, cellY + 1);
 
@@ -1305,7 +1315,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (comments) {
                 doc.setFontSize(9);
                 doc.setFont("helvetica", "normal");
-                doc.setTextColor(COLOR_SECONDARY);
+                doc.setTextColor(PDF_TEXT_COLOR); // Utilisation de la couleur dynamique
                 const splitComments = doc.splitTextToSize(comments, cellWidth - 4);
                 doc.text(splitComments, cellX + 2, commentsY + 4);
             } else {
@@ -1899,6 +1909,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             capturer.start();
 
+            // DÉTECTION COULEUR DE FOND POUR LA VIDÉO
+            const isCrab = document.body.classList.contains('crab-mode');
+            const bgFill = isCrab ? '#72243D' : '#BFA98D'; 
+
             function renderFrame() {
                 if (elapsed > totalDuration) {
                     buttonElement.textContent = 'Encodage...';
@@ -1919,7 +1933,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const progress = Math.min(elapsed / totalDuration, 1);
                 buttonElement.textContent = `Capture: ${Math.round(progress * 100)}%`;
                 
-                offscreenCtx.fillStyle = '#BFA98D';
+                offscreenCtx.fillStyle = bgFill; // Utilise la couleur dynamique
                 offscreenCtx.fillRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
 
                 offscreenCtx.drawImage(courtImage, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
@@ -2033,93 +2047,9 @@ document.addEventListener('DOMContentLoaded', () => {
     viewFullCourtBtn.addEventListener("click", () => setCourtView("full"));
     viewHalfCourtBtn.addEventListener("click", () => setCourtView("half"));
 
-    function getDistanceToSegment(p, p1, p2) {
-        const l2 = (p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2;
-        if (l2 === 0) return Math.hypot(p.x - p1.x, p.y - p1.y);
-        let t = ((p.x - p1.x) * (p2.x - p1.x) + (p.y - p1.y) * (p2.y - p1.y)) / l2;
-        t = Math.max(0, Math.min(1, t));
-        const proj = { x: p1.x + t * (p2.x - p1.x), y: p1.y + t * (p2.y - p1.y) };
-        return Math.hypot(p.x - proj.x, p.y - proj.y);
-    }
-    
-    function getPointOnPath(pathPoints, progress) {
-        if (!pathPoints || pathPoints.length < 2) return null;
-    
-        const lengths = [];
-        let totalLength = 0;
-        for (let i = 0; i < pathPoints.length - 1; i++) {
-            const dist = Math.hypot(pathPoints[i+1].x - pathPoints[i].x, pathPoints[i+1].y - pathPoints[i].y);
-            lengths.push(dist);
-            totalLength += dist;
-        }
-    
-        if (totalLength === 0) return pathPoints[0];
-    
-        let distanceToGo = totalLength * progress;
-        if (distanceToGo < 0) distanceToGo = 0;
-        if (distanceToGo > totalLength) distanceToGo = totalLength;
-
-        for (let i = 0; i < lengths.length; i++) {
-            if (distanceToGo <= lengths[i]) {
-                const segmentProgress = lengths[i] === 0 ? 0 : distanceToGo / lengths[i];
-                const p1 = pathPoints[i];
-                const p2 = pathPoints[i+1];
-                return {
-                    x: p1.x + (p2.x - p1.x) * segmentProgress,
-                    y: p1.y + (p2.y - p1.y) * segmentProgress
-                };
-            }
-            distanceToGo -= lengths[i];
-        }
-    
-        return pathPoints[pathPoints.length - 1];
-    }
-    
-    function getPathSlice(pathPoints, progress) {
-        if (!pathPoints || pathPoints.length < 2 || progress <= 0) return [];
-        if (progress >= 1) return pathPoints;
-        
-        const lengths = [];
-        let totalLength = 0;
-        for (let i = 0; i < pathPoints.length - 1; i++) {
-            const dist = Math.hypot(pathPoints[i+1].x - pathPoints[i].x, pathPoints[i+1].y - pathPoints[i].y);
-            lengths.push(dist);
-            totalLength += dist;
-        }
-
-        if (totalLength === 0) return [pathPoints[0]];
-
-        let distanceToGo = totalLength * progress;
-        const newPath = [pathPoints[0]];
-
-        for (let i = 0; i < lengths.length; i++) {
-            if (distanceToGo <= lengths[i]) {
-                const segmentProgress = lengths[i] === 0 ? 0 : distanceToGo / lengths[i];
-                const p1 = pathPoints[i];
-                const p2 = pathPoints[i+1];
-                newPath.push({
-                    x: p1.x + (p2.x - p1.x) * segmentProgress,
-                    y: p1.y + (p2.y - p1.y) * segmentProgress
-                });
-                return newPath;
-            }
-            distanceToGo -= lengths[i];
-            newPath.push(pathPoints[i+1]);
-        }
-        return newPath;
-    }
-    
-    function updateThemeUI(theme) {
-        const isDarkMode = theme === 'dark';
-        body.classList.toggle('dark-mode', isDarkMode);
-        themeIconSun.classList.toggle('hidden', isDarkMode);
-        themeIconMoon.classList.toggle('hidden', !isDarkMode);
-    }
-
-    // --- Gestion du Thème "Crab" ---
-
+    // --- FONCTION CRITIQUE : Mise à jour du Thème (SVG et UI) ---
     function updateTeamThemeUI(isCrabMode) {
-        // 1. Gestion de la classe CSS
+        // 1. Classe CSS (pour les boutons, header HTML)
         if (isCrabMode) {
             body.classList.add('crab-mode');
             teamThemeBtn.classList.add('active');
@@ -2128,140 +2058,106 @@ document.addEventListener('DOMContentLoaded', () => {
             teamThemeBtn.classList.remove('active');
         }
 
-        // 2. Mise à jour du Terrain SVG (Couleurs et Texte)
+        // 2. Modification du SVG (Le terrain)
         const courtSvg = document.getElementById('court-svg');
-        const courtRect = courtSvg.querySelector('rect[width="280"]'); // Le fond du terrain
-        const courtLinesGroup = courtSvg.querySelector('g[stroke]'); // Les lignes
-        const centerCircle = courtSvg.querySelector('.center-court-logo circle:first-child'); // Rond central fond
-        const centerText = courtSvg.querySelector('.center-court-logo text'); // Texte central
+        const courtRect = courtSvg.querySelector('rect[width="280"]'); // Fond
+        const centerCircle = courtSvg.querySelector('.center-court-logo circle:first-child'); // Rond central
+        const centerText = courtSvg.querySelector('.center-court-logo text'); // Texte
 
         if (isCrabMode) {
-            // Couleurs Crab
-            const crabPrimary = '#72243D'; // Bordeaux (au lieu de l'or)
-            const crabSecondary = '#F9AB00'; // Jaune (au lieu du noir)
+            // COULEURS CRAB EXACTES
+            const crabPrimary = '#72243D';   // Bordeaux
+            const crabSecondary = '#F9AB00'; // Jaune
 
-            // Appliquer au SVG
+            // Fond et cercle central -> Bordeaux
             if(courtRect) courtRect.setAttribute('fill', crabPrimary);
             if(centerCircle) centerCircle.setAttribute('fill', crabPrimary);
             
-            // Changer les lignes (stroke)
+            // Lignes et marquages -> Jaune
             courtSvg.querySelectorAll('line, path, circle, rect:not([width="280"])').forEach(el => {
-                // On évite de changer le gros rect de fond
-                if (el.getAttribute('width') !== '280') {
-                    if (el.getAttribute('stroke')) el.setAttribute('stroke', crabSecondary);
-                    // Pour les cercles du logo qui ont un fill="none"
-                    if (el.getAttribute('fill') === 'none' && el.getAttribute('stroke')) el.setAttribute('stroke', crabSecondary);
-                }
+                // On touche aux éléments qui dessinent les lignes (stroke)
+                if (el.getAttribute('stroke')) el.setAttribute('stroke', crabSecondary);
+                // On touche aux cercles vides (fill="none")
+                if (el.getAttribute('fill') === 'none' && el.getAttribute('stroke')) el.setAttribute('stroke', crabSecondary);
             });
 
-            // Changer le texte
+            // Texte -> CRAB en Jaune
             if (centerText) {
                 centerText.textContent = "CRAB";
                 centerText.setAttribute('fill', crabSecondary);
             }
 
         } else {
-            // Couleurs Originales (ORB)
+            // COULEURS ORIGINALES (ORB)
             const orbGold = '#BFA98D';
             const orbBlack = '#212121';
 
-            // Restaurer le SVG
             if(courtRect) courtRect.setAttribute('fill', orbGold);
             if(centerCircle) centerCircle.setAttribute('fill', orbGold);
 
             courtSvg.querySelectorAll('line, path, circle, rect:not([width="280"])').forEach(el => {
-                if (el.getAttribute('width') !== '280') {
-                    if (el.getAttribute('stroke')) el.setAttribute('stroke', orbBlack);
-                }
+                if (el.getAttribute('stroke')) el.setAttribute('stroke', orbBlack);
             });
 
-            // Restaurer le texte
             if (centerText) {
                 centerText.textContent = "ORB";
                 centerText.setAttribute('fill', orbBlack);
             }
         }
         
-        // Redessiner le canvas pour appliquer les changements s'il y a des éléments transparents
-        redrawCanvas();
+        redrawCanvas(); // Force le redessin
     }
 
-    // Écouteur sur le bouton
+    // Écouteur Bouton Crab
     if (teamThemeBtn) {
         teamThemeBtn.addEventListener('click', () => {
             const isCurrentlyCrab = body.classList.contains('crab-mode');
             const newMode = !isCurrentlyCrab;
-            
             localStorage.setItem('teamMode', newMode ? 'crab' : 'orb');
             updateTeamThemeUI(newMode);
         });
     }
 
-    // --- CORRECTION MAJEURE : C'est le "boss" de l'application ---
+    function updateThemeUI(theme) {
+        const isDarkMode = theme === 'dark';
+        body.classList.toggle('dark-mode', isDarkMode);
+        themeIconSun.classList.toggle('hidden', isDarkMode);
+        themeIconMoon.classList.toggle('hidden', !isDarkMode);
+    }
+
+    // --- Initialisation ---
     async function initializeApp() {
-        
-        // 1. S'assurer que l'instance globale existe
         if (typeof orbDB === 'undefined' || !orbDB) {
-            console.error("ERREUR FATALE : orbDB n'est pas défini. Vérifiez l'ordre de chargement des scripts.");
-            alert("Erreur critique au démarrage. Impossible de charger la base de données.");
-            return;
+            console.error("ERREUR DB"); return;
         }
-        
-        // 2. Ouvrir la connexion UNE SEULE FOIS pour toute l'application
-        try {
-            await orbDB.open();
-            console.log("Base de données initialisée globalement.");
-        } catch (err) {
-            console.error("Impossible d'initialiser la base de données:", err);
-            alert("Erreur critique : la base de données locale n'a pas pu être chargée.");
-            return; // Stoppe le chargement de l'app si la DB échoue
-        }
+        await orbDB.open();
 
-        // 3. Le reste de l'initialisation de l'interface
-        const primaryColors = ['#d32f2f', '#007bff', '#28a745', '#ffc107', '#343a40', '#f8f9fa'];
-        const zoneColors = ['#ffeb3b', '#8bc34a', '#2196f3', '#e91e63'];
-        const coneColors = ['#ff7f50', '#ff4500', '#fca503', '#4682b4', '#333333'];
-        const hoopColors = ['#ff0000', '#0000ff', '#00ff00', '#ffff00', '#ff69b4'];
-        const basketColors = ['#E65100', '#696969', '#000000'];
+        // Couleurs par défaut
+        createColorPalette(allPropGroups.player.group, ['#d32f2f', '#007bff', '#28a745', '#ffc107', '#343a40', '#f8f9fa']);
+        createColorPalette(allPropGroups.defender.group, ['#d32f2f', '#007bff', '#28a745', '#ffc107', '#343a40', '#f8f9fa']);
+        createColorPalette(allPropGroups.path.group, ['#d32f2f', '#007bff', '#28a745', '#ffc107', '#343a40', '#f8f9fa']);
+        createColorPalette(allPropGroups.text.group, ['#d32f2f', '#007bff', '#28a745', '#ffc107', '#343a40', '#f8f9fa']);
+        createColorPalette(allPropGroups.zone.group, ['#ffeb3b', '#8bc34a', '#2196f3', '#e91e63']);
+        createColorPalette(allPropGroups.cone.group, ['#ff7f50', '#ff4500', '#fca503', '#4682b4', '#333333']);
+        createColorPalette(allPropGroups.hoop.group, ['#ff0000', '#0000ff', '#00ff00', '#ffff00', '#ff69b4']);
+        createColorPalette(allPropGroups.basket.group, ['#E65100', '#696969', '#000000']);
 
-        createColorPalette(allPropGroups.player.group, primaryColors);
-        createColorPalette(allPropGroups.defender.group, primaryColors);
-        createColorPalette(allPropGroups.path.group, primaryColors);
-        createColorPalette(allPropGroups.text.group, primaryColors);
-        createColorPalette(allPropGroups.zone.group, zoneColors);
-        createColorPalette(allPropGroups.cone.group, coneColors);
-        createColorPalette(allPropGroups.hoop.group, hoopColors);
-        createColorPalette(allPropGroups.basket.group, basketColors);
-        
+        // Thème Clair/Sombre
         const savedTheme = localStorage.getItem('theme') || 'light';
         updateThemeUI(savedTheme);
 
-        // --- AJOUTER ICI : Gestion du thème Crab au démarrage ---
+        // --- RESTAURATION THEME CRAB ---
         const savedTeamMode = localStorage.getItem('teamMode');
         if (savedTeamMode === 'crab') {
             updateTeamThemeUI(true);
         }
-        // ------------------------------------------
 
         setCourtView("full");
         document.getElementById("tool-select").click();
-        
-        commitState();
-        
         switchToScene(0);
         
-        // 4. RÉVEILLER LES AUTRES MODULES
-        if (typeof initManager === 'function') {
-            initManager();
-        } else {
-            console.error("initManager n'est pas une fonction.");
-        }
-        
-        if (typeof initPlanner === 'function') {
-            initPlanner();
-        } else {
-            console.error("initPlanner n'est pas une fonction.");
-        }
+        if (typeof initManager === 'function') initManager();
+        if (typeof initPlanner === 'function') initPlanner();
     }
 
     themeToggleBtn.addEventListener('click', () => {
@@ -2270,29 +2166,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateThemeUI(newTheme);
     });
 
-    
-    // --- GESTION BIBLIOTHÈQUE (VERSION AVEC TAGS GÉRÉS) ---
-
-    async function generatePreviewBlob() {
-        // S'assure que html2canvas est chargé
-        if (typeof window.html2canvas === 'undefined') {
-            alert("Erreur: La bibliothèque de rendu (html2canvas) n'a pas pu être chargée.");
-            return null;
-        }
-        const courtContainer = document.getElementById("court-container");
-        try {
-            const canvas = await html2canvas(courtContainer, { scale: 1, backgroundColor: null });
-            return new Promise(resolve => {
-                canvas.toBlob(resolve, 'image/png', 0.9);
-            });
-        } catch (error) {
-            console.error("Erreur lors de la génération de l'aperçu:", error);
-            return null;
-        }
-    }
-
-    // --- CORRECTION v4.5 ---
-    // Logique de sauvegarde mise à jour pour utiliser "currentLoadedPlaybookId"
+    // ... (Reste des gestionnaires d'événements existants : saveToLibrary, loadPlaybook, etc.) ...
+    // CORRECTION v4.5
     saveToLibraryBtn.addEventListener('click', async () => {
         const button = saveToLibraryBtn;
         button.disabled = true;
@@ -2371,6 +2246,5 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('loadPlaybook', loadPlaybookFromEvent);
     // --- FIN GESTION BIBLIOTHÈQUE ---
 
-    // Appelle la fonction d'initialisation principale
     initializeApp();
 });
