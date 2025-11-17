@@ -125,6 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeIconSun = document.getElementById('theme-icon-sun');
     const themeIconMoon = document.getElementById('theme-icon-moon');
 
+    // NOUVEAU : Bouton Thème Équipe
+    const teamThemeBtn = document.getElementById('team-theme-btn');
+
 
     let animationState = {
         isPlaying: false,
@@ -2113,6 +2116,87 @@ document.addEventListener('DOMContentLoaded', () => {
         themeIconMoon.classList.toggle('hidden', !isDarkMode);
     }
 
+    // --- Gestion du Thème "Crab" ---
+
+    function updateTeamThemeUI(isCrabMode) {
+        // 1. Gestion de la classe CSS
+        if (isCrabMode) {
+            body.classList.add('crab-mode');
+            teamThemeBtn.classList.add('active');
+        } else {
+            body.classList.remove('crab-mode');
+            teamThemeBtn.classList.remove('active');
+        }
+
+        // 2. Mise à jour du Terrain SVG (Couleurs et Texte)
+        const courtSvg = document.getElementById('court-svg');
+        const courtRect = courtSvg.querySelector('rect[width="280"]'); // Le fond du terrain
+        const courtLinesGroup = courtSvg.querySelector('g[stroke]'); // Les lignes
+        const centerCircle = courtSvg.querySelector('.center-court-logo circle:first-child'); // Rond central fond
+        const centerText = courtSvg.querySelector('.center-court-logo text'); // Texte central
+
+        if (isCrabMode) {
+            // Couleurs Crab
+            const crabPrimary = '#72243D'; // Bordeaux (au lieu de l'or)
+            const crabSecondary = '#F9AB00'; // Jaune (au lieu du noir)
+
+            // Appliquer au SVG
+            if(courtRect) courtRect.setAttribute('fill', crabPrimary);
+            if(centerCircle) centerCircle.setAttribute('fill', crabPrimary);
+            
+            // Changer les lignes (stroke)
+            courtSvg.querySelectorAll('line, path, circle, rect:not([width="280"])').forEach(el => {
+                // On évite de changer le gros rect de fond
+                if (el.getAttribute('width') !== '280') {
+                    if (el.getAttribute('stroke')) el.setAttribute('stroke', crabSecondary);
+                    // Pour les cercles du logo qui ont un fill="none"
+                    if (el.getAttribute('fill') === 'none' && el.getAttribute('stroke')) el.setAttribute('stroke', crabSecondary);
+                }
+            });
+
+            // Changer le texte
+            if (centerText) {
+                centerText.textContent = "CRAB";
+                centerText.setAttribute('fill', crabSecondary);
+            }
+
+        } else {
+            // Couleurs Originales (ORB)
+            const orbGold = '#BFA98D';
+            const orbBlack = '#212121';
+
+            // Restaurer le SVG
+            if(courtRect) courtRect.setAttribute('fill', orbGold);
+            if(centerCircle) centerCircle.setAttribute('fill', orbGold);
+
+            courtSvg.querySelectorAll('line, path, circle, rect:not([width="280"])').forEach(el => {
+                if (el.getAttribute('width') !== '280') {
+                    if (el.getAttribute('stroke')) el.setAttribute('stroke', orbBlack);
+                }
+            });
+
+            // Restaurer le texte
+            if (centerText) {
+                centerText.textContent = "ORB";
+                centerText.setAttribute('fill', orbBlack);
+            }
+        }
+        
+        // Redessiner le canvas pour appliquer les changements s'il y a des éléments transparents
+        redrawCanvas();
+    }
+
+    // Écouteur sur le bouton
+    if (teamThemeBtn) {
+        teamThemeBtn.addEventListener('click', () => {
+            const isCurrentlyCrab = body.classList.contains('crab-mode');
+            const newMode = !isCurrentlyCrab;
+            
+            localStorage.setItem('teamMode', newMode ? 'crab' : 'orb');
+            updateTeamThemeUI(newMode);
+        });
+    }
+
     // --- CORRECTION MAJEURE : C'est le "boss" de l'application ---
     async function initializeApp() {
         
@@ -2151,6 +2235,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const savedTheme = localStorage.getItem('theme') || 'light';
         updateThemeUI(savedTheme);
+
+        // --- AJOUTER ICI : Gestion du thème Crab au démarrage ---
+        const savedTeamMode = localStorage.getItem('teamMode');
+        if (savedTeamMode === 'crab') {
+            updateTeamThemeUI(true);
+        }
+        // ------------------------------------------
 
         setCourtView("full");
         document.getElementById("tool-select").click();
