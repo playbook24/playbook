@@ -104,7 +104,8 @@ body.dark-mode #settings-panel .creator-credit {
 }
 
 /* Style pour le bouton Thème DANS le panneau des paramètres */
-#settings-panel #theme-toggle-btn {
+#settings-panel #theme-toggle-btn,
+#settings-panel #team-theme-btn {
     background: transparent;
     border: 2px solid var(--color-secondary); /* Utilise le style de bouton standard */
     color: var(--color-text); /* Couleur de texte normale */
@@ -114,19 +115,29 @@ body.dark-mode #settings-panel .creator-credit {
     padding: 6px; /* Centre l'icône */
 }
 
-#settings-panel #theme-toggle-btn:hover {
+#settings-panel #theme-toggle-btn:hover,
+#settings-panel #team-theme-btn:hover,
+#settings-panel #team-theme-btn.active {
     transform: translateY(-2px); /* Effet de survol standard */
     box-shadow: var(--shadow-lifted);
     border-color: var(--color-primary);
 }
 
+#settings-panel #team-theme-btn.active {
+    background-color: var(--color-primary);
+    color: var(--color-button-text-on-gold);
+}
+
+
 /* Ajustement pour le mode sombre */
-body.dark-mode #settings-panel #theme-toggle-btn {
+body.dark-mode #settings-panel #theme-toggle-btn,
+body.dark-mode #settings-panel #team-theme-btn {
     border-color: var(--color-border);
     color: var(--color-text);
 }
 
-body.dark-mode #settings-panel #theme-toggle-btn:hover {
+body.dark-mode #settings-panel #theme-toggle-btn:hover,
+body.dark-mode #settings-panel #team-theme-btn:hover {
      border-color: var(--color-primary);
      background-color: #2a2a2a;
 }
@@ -712,3 +723,32 @@ body.dark-mode .help-content code {
     color: #f5f5f5;
 }
 /* --- Fin des styles d'Aide --- */
+
+/* --- Mode CRAB (Thème Équipe) --- */
+body.crab-mode {
+    /* Remplace l'Or (#BFA98D) par le Bordeaux (#72243D) */
+    --color-primary: #72243D; 
+    
+    /* Remplace le Noir (#212121) par le Jaune/Orange (#F9AB00) */
+    --color-secondary: #F9AB00; 
+    
+    /* Ajustement pour le texte sur les boutons primaires (Bordeaux) -> Blanc */
+    --color-button-text-on-gold: #FFFFFF; 
+}
+
+/* Ajustements spécifiques pour le mode Crab */
+body.crab-mode .app-header {
+    background-color: var(--color-secondary); /* Jaune */
+}
+
+/* Le texte sur fond jaune doit être noir pour le contraste */
+body.crab-mode .app-header h1, 
+body.crab-mode .header-right .btn-icon,
+body.crab-mode #toggle-playbook-manager-btn {
+    color: #212121; 
+}
+
+body.crab-mode #toggle-playbook-manager-btn:hover {
+     background-color: rgba(0, 0, 0, 0.1);
+     color: var(--color-primary);
+}
