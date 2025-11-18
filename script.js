@@ -2166,7 +2166,32 @@ document.addEventListener('DOMContentLoaded', () => {
         updateThemeUI(newTheme);
     });
 
-    // ... (Reste des gestionnaires d'événements existants : saveToLibrary, loadPlaybook, etc.) ...
+    // --- FONCTION MANQUANTE À AJOUTER ---
+    function generatePreviewBlob() {
+        return new Promise((resolve) => {
+            const element = document.getElementById('court-container');
+            if (typeof window.html2canvas === 'undefined') {
+                console.error("html2canvas n'est pas chargé.");
+                resolve(null);
+                return;
+            }
+            
+            // On utilise html2canvas pour capturer le terrain (SVG fond + Canvas joueurs)
+            html2canvas(element, {
+                scale: 0.4, // On réduit l'échelle pour ne pas surcharger la base de données
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
+                canvas.toBlob(blob => {
+                    resolve(blob);
+                }, 'image/jpeg', 0.7); // Compression JPEG 70%
+            }).catch(err => {
+                console.error("Erreur génération aperçu:", err);
+                resolve(null);
+            });
+        });
+    }
+
     // CORRECTION v4.5
     saveToLibraryBtn.addEventListener('click', async () => {
         const button = saveToLibraryBtn;
