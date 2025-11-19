@@ -789,3 +789,101 @@ body.crab-mode #toggle-playbook-manager-btn:hover {
      background-color: rgba(0, 0, 0, 0.1);
      color: var(--color-primary);
 }
+/* --- OPTIMISATION MOBILE & TABLETTE --- */
+
+/* Empêcher le scroll quand on touche le canvas */
+#basketball-court, #animation-canvas {
+    touch-action: none;
+}
+
+@media (max-width: 1024px) {
+    /* Réorganisation globale en colonne */
+    .main-content {
+        flex-direction: column;
+        padding: 10px;
+        gap: 15px;
+    }
+
+    /* Le terrain prend toute la largeur */
+    .main-area {
+        width: 100%;
+        order: 1; /* Le terrain en premier */
+    }
+
+    /* La barre latérale passe en dessous */
+    #sidebar {
+        width: 100%;
+        order: 2;
+        display: flex;
+        flex-direction: column; /* Garde les éléments les uns sous les autres */
+    }
+
+    /* Ajustement des outils pour qu'ils soient plus faciles à toucher */
+    .tool-btn {
+        min-width: 44px; /* Standard tactile Apple/Android */
+        height: 44px;
+        padding: 8px;
+    }
+
+    /* Barre d'outils défilable horizontalement si trop d'outils */
+    #toolbar {
+        overflow-x: auto;
+        padding-bottom: 5px;
+        flex-wrap: nowrap; /* Force une seule ligne */
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .tool-group {
+        flex-shrink: 0; /* Empêche l'écrasement des groupes */
+    }
+
+    /* Panneaux Flottants (Settings/Manager) en Plein Écran sur mobile */
+    .floating-panel {
+        position: fixed;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100%;
+        max-width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+    }
+    
+    /* Contenu interne des panneaux mobile */
+    .floating-panel > div {
+        padding: 20px;
+        overflow-y: auto;
+        height: 100%;
+    }
+
+    /* Bouton fermeture pour les panneaux flottants (on réutilise le style header) */
+    #toggle-playbook-manager-btn.active,
+    #toggle-settings-btn.active {
+        z-index: 1001; /* Au-dessus du panneau plein écran */
+        position: fixed;
+        top: 10px;
+        right: 10px;
+    }
+    
+    /* Cacher le header quand un panneau est ouvert pour gagner de la place */
+    body:has(.floating-panel:not(.hidden)) .app-header {
+        display: none;
+    }
+}
+
+/* Mode Paysage sur Mobile (Souvent trop petit en hauteur) */
+@media (max-height: 500px) and (orientation: landscape) {
+    .app-header {
+        display: none; /* On cache le header pour laisser la place au terrain */
+    }
+    .main-content {
+        padding: 5px;
+    }
+}
