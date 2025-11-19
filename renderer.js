@@ -1,24 +1,21 @@
 /**
  * renderer.js
- * Gère le dessin sur le Canvas (Joueurs, Ballons, Terrains, Chemins).
+ * Gère le dessin sur le Canvas.
+ * CORRECTION : Polices sécurisées pour l'export PDF (Arial fallback).
  */
 
 window.ORB.renderer = {
     
-    // Redessine tout le canvas principal
     redrawCanvas: function() {
         const { ctx, canvas, playbookState, appState } = window.ORB;
         const rect = canvas.getBoundingClientRect();
         
-        // Effacer
         ctx.clearRect(0, 0, rect.width, rect.height);
 
-        // Vérifier s'il y a une scène active
         if (!playbookState.scenes[playbookState.activeSceneIndex]) return;
         
         const elements = playbookState.scenes[playbookState.activeSceneIndex].elements;
 
-        // Ordre de dessin (Z-index)
         const drawOrder = [
             ['zone'], 
             ['arrow', 'pass', 'dribble', 'screen', 'pencil'],
@@ -30,18 +27,15 @@ window.ORB.renderer = {
 
         drawOrder.forEach(types => {
             elements.filter(el => types.includes(el.type)).forEach(el => {
-                // Ne pas dessiner le ballon s'il est lié à un joueur (le joueur le dessine)
                 if (el.type === 'ball' && el.linkedTo) return;
                 
                 const isSelected = appState.selectedElement && appState.selectedElement.id === el.id;
                 
-                // Routage vers la bonne fonction de dessin
                 if (['arrow', 'pass', 'dribble', 'screen', 'pencil'].includes(el.type)) {
                     this.drawPath(el.points, isSelected, el, ctx);
                 } else if (el.type === 'zone') {
                     this.drawZone(el.x, el.y, el.width, el.height, isSelected, el, ctx);
                 } else {
-                    // Fonctions génériques (Player, Defender, etc.)
                     const methodName = 'draw' + el.type.charAt(0).toUpperCase() + el.type.slice(1);
                     if (this[methodName]) {
                         this[methodName](el.x, el.y, isSelected, el, ctx);
@@ -50,25 +44,22 @@ window.ORB.renderer = {
             });
         });
 
-        // Dessin du tracé en cours (si on est en train de dessiner)
         if (appState.isDrawing && appState.currentPath.length > 0 && appState.lastMousePos) {
             this.drawPath([...appState.currentPath, appState.lastMousePos], true, { type: appState.currentTool, color: '#FFD700' }, ctx);
         }
         
-        // Dessin de la zone temporaire (drag)
         if (appState.tempElement && appState.tempElement.type === 'zone') {
             this.drawZone(appState.tempElement.x, appState.tempElement.y, appState.tempElement.width, appState.tempElement.height, true, { color: '#FFD700' }, ctx);
         }
     },
 
-    // --- FONCTIONS DE DESSIN INDIVIDUELLES ---
+    // --- FONCTIONS DE DESSIN ---
 
     drawPlayer: function(logicalX, logicalY, isSelected, options = {}, p_ctx, p_getCoordsFn, animParams = {}) {
         const getCoords = p_getCoordsFn || window.ORB.utils.getPixelCoords;
         const { x, y } = getCoords({ x: logicalX, y: logicalY });
         const radius = 10;
         
-        // Vérifier si le joueur a le ballon
         let hasBall = false;
         if (animParams.isAnimating) {
             if(animParams.passData && animParams.passData.length > 0) {
@@ -94,7 +85,6 @@ window.ORB.renderer = {
         p_ctx.fillStyle = options.color || '#007BFF';
         p_ctx.fill();
         
-        // Indicateur de direction si animé
         if (animParams.isAnimating) {
             p_ctx.beginPath();
             p_ctx.moveTo(radius * 0.3, 0);
@@ -106,7 +96,6 @@ window.ORB.renderer = {
         
         p_ctx.rotate(-(options.rotation || 0));
 
-        // Bordure (Sélection ou Possession ballon)
         p_ctx.strokeStyle = isSelected ? '#FFD700' : (hasBall ? '#FFA500' : '#FFFFFF');
         p_ctx.lineWidth = hasBall ? 2.5 : 2;
         p_ctx.beginPath();
@@ -115,7 +104,8 @@ window.ORB.renderer = {
         
         if (options.label) {
             p_ctx.fillStyle = '#FFFFFF';
-            p_ctx.font = `bold ${radius + 2}px Roboto`;
+            // MODIFICATION ICI : Ajout de 'Arial' et 'sans-serif' en secours
+            p_ctx.font = `bold ${radius + 2}px "Roboto", "Arial", sans-serif`;
             p_ctx.textAlign = 'center';
             p_ctx.textBaseline = 'middle';
             p_ctx.fillText(options.label, 0, 0);
@@ -141,7 +131,8 @@ window.ORB.renderer = {
         
         if (options.label) {
             p_ctx.fillStyle = isSelected ? '#FFD700' : (options.color || '#D32F2F');
-            p_ctx.font = `bold ${radius}px Roboto`;
+            // MODIFICATION ICI : Ajout de 'Arial' en secours
+            p_ctx.font = `bold ${radius}px "Roboto", "Arial", sans-serif`;
             p_ctx.textAlign = 'center';
             p_ctx.textBaseline = 'bottom';
             p_ctx.fillText(options.label, x, y - radius - 5);
@@ -235,7 +226,8 @@ window.ORB.renderer = {
         const { x, y } = getCoords({ x: logicalX, y: logicalY });
         const size = options.size || 14;
         
-        p_ctx.font = `bold ${size}px Roboto`;
+        // MODIFICATION ICI : Ajout de 'Arial' en secours pour les textes manuels
+        p_ctx.font = `bold ${size}px "Roboto", "Arial", sans-serif`;
         p_ctx.fillStyle = isSelected ? '#FFD700' : (options.color || '#212121');
         p_ctx.textAlign = 'center';
         p_ctx.textBaseline = 'middle';
@@ -287,7 +279,6 @@ window.ORB.renderer = {
         
         if (options.type === 'pencil' || options.noHead) return;
         
-        // Dessin de la pointe de flèche / écran
         p_ctx.save();
         const endPoint = pixelPoints[pixelPoints.length - 1];
         let nearEndPoint = pixelPoints[pixelPoints.length - 2] || pixelPoints[0];
@@ -345,7 +336,6 @@ window.ORB.renderer = {
         p_ctx.lineTo(end.x, end.y);
     },
 
-    // Redimensionne le canvas pour le Retina
     resizeCanvas: function() {
         return new Promise(resolve => {
             setTimeout(() => {

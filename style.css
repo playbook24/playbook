@@ -887,3 +887,10 @@ body.crab-mode #toggle-playbook-manager-btn:hover {
         padding: 5px;
     }
 }
+/* --- CORRECTIF POLICE PDF (Logo Central) --- */
+.center-court-logo text {
+    /* On ajoute Impact et Arial Black en secours pour l'export PDF */
+    font-family: 'Anton', 'Impact', 'Arial Black', sans-serif !important;
+    font-weight: bold;
+    text-transform: uppercase;
+}
