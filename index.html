@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="manager.css">
     <link rel="stylesheet" href="planner.css">
@@ -223,7 +224,7 @@
                         <button id="action-undo" title="Annuler (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M12.5,8C9.85,8 7.45,9 5.6,10.6L2,7V16H11L7.38,12.38C8.77,11.22 10.54,10.5 12.5,10.5C16.04,10.5 19.05,12.81 20.1,16L22.47,15.22C21.08,11.03 17.15,8 12.5,8Z"/></svg></button>
                         <button id="action-redo" title="Rétablir (Ctrl+Y)"><svg viewBox="0 0 24 24"><path d="M18.4,10.6C16.55,9 14.15,8 11.5,8C7.85,8 4.92,11.03 3.53,15.22L1,16C2.95,12.81 5.96,10.5 9.5,10.5C11.46,10.5 13.23,11.22 14.62,12.38L11,16H20V7L18.4,10.6Z"/></svg></button>
                         <button id="action-mirror" title="Inverser le schéma (Miroir)"><svg viewBox="0 0 24 24"><path d="M12,4L8,8H11V16H8L12,20L16,16H13V8H16L12,4M2,12H4V14H2V12M6,12H8V14H6V12M18,12H20V14H18V12M22,12H24V14H22V12Z"/></svg></button>
-                        <button id="tool-clear" class="danger" title="Effacer la scène"><svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg></button>
+                        <button id="tool-clear" class="danger" title="Effacer la scène"><svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2 2 0 0,0 8,21H16A2 2 0 0,0 18,19V7H6V19Z"/></svg></button>
                     </div>
                 </div>
             </div>
@@ -408,6 +409,39 @@
             <p>Pour éviter cela, utilisez régulièrement le bouton <strong>"Sauvegarder TOUT (Backup)"</strong> dans le panneau "Playbook" (en haut à gauche).</p>
             <p>Cela exportera un <strong>fichier de backup unique</strong> (un <code>.json</code>) contenant TOUS vos playbooks, TOUS vos tags et TOUS vos plans. Conservez ce fichier en lieu sûr. Si vous changez d'ordinateur ou si vous perdez vos données, vous pourrez tout restaurer en utilisant le bouton <strong>"Charger"</strong> et en sélectionnant ce fichier de backup.</p>
 
+            <h3>7. Raccourcis Clavier</h3>
+            <p>Gagnez du temps lors de la création de vos schémas grâce à ces raccourcis :</p>
+            
+            <table class="help-shortcuts-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Raccourci</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Annuler (Undo)</td>
+                        <td><span class="key">Ctrl</span> + <span class="key">Z</span></td>
+                    </tr>
+                    <tr>
+                        <td>Rétablir (Redo)</td>
+                        <td><span class="key">Ctrl</span> + <span class="key">Y</span></td>
+                    </tr>
+                    <tr>
+                        <td>Supprimer l'élément sélectionné</td>
+                        <td><span class="key">Suppr</span> ou <span class="key">Retour</span></td>
+                    </tr>
+                    <tr>
+                        <td>Valider un tracé (crayon, course...)</td>
+                        <td><span class="key">Entrée</span></td>
+                    </tr>
+                    <tr>
+                        <td>Dupliquer une scène</td>
+                        <td>(Pas de raccourci, utilisez le bouton)</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
     
@@ -466,9 +500,17 @@
     <script src="https://unpkg.com/ccapture.js@1.1.0/build/CCapture.all.min.js"></script>
     
     <script src="db.js"></script>
+    
     <script src="manager.js"></script>
     <script src="planner.js"></script>
-    <script src="script.js"></script>
+
+    <script src="state.js"></script>
+    <script src="utils.js"></script>
+    <script src="renderer.js"></script>
+    <script src="interaction.js"></script>
+    <script src="animation.js"></script>
+    <script src="ui.js"></script>
+    <script src="main.js"></script>
 
 </body>
 </html>
