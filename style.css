@@ -21,7 +21,7 @@ body {
     background-color: var(--color-background);
     color: var(--color-text);
     margin: 0;
-    padding: 0; /* Suppression du padding-top inutile */
+    padding: 0;
     box-sizing: border-box;
     transition: background-color 0.3s ease, color 0.3s ease;
     line-height: 1.6;
@@ -32,7 +32,6 @@ body {
     padding: 15px 25px;
     margin-bottom: 20px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    /* MODIFICATION : Suppression de "position: fixed" et des propriétés associées */
 }
 
 .header-content {
@@ -55,8 +54,8 @@ body {
 .header-right {
     display: flex;
     justify-content: flex-end;
-    align-items: center; /* AJOUTÉ */
-    gap: 15px; /* AJOUTÉ */
+    align-items: center;
+    gap: 15px;
 }
 
 /* NOUVEAU STYLE POUR LE CRÉDIT (dans le panneau des paramètres) */
@@ -79,7 +78,7 @@ body.dark-mode #settings-panel .creator-credit {
     border-radius: 8px 8px 0 0;
     height: 45px;
     position: absolute;
-    bottom: -16px; /* Ajustement pour s'aligner avec le bas du header */
+    bottom: -16px;
     left: 0;
 }
 
@@ -107,18 +106,18 @@ body.dark-mode #settings-panel .creator-credit {
 #settings-panel #theme-toggle-btn,
 #settings-panel #team-theme-btn {
     background: transparent;
-    border: 2px solid var(--color-secondary); /* Utilise le style de bouton standard */
-    color: var(--color-text); /* Couleur de texte normale */
-    border-radius: 8px; /* Correspond aux autres boutons */
-    width: 40px; /* Taille fixe */
+    border: 2px solid var(--color-secondary);
+    color: var(--color-text);
+    border-radius: 8px;
+    width: 40px;
     height: 40px;
-    padding: 6px; /* Centre l'icône */
+    padding: 6px;
 }
 
 #settings-panel #theme-toggle-btn:hover,
 #settings-panel #team-theme-btn:hover,
 #settings-panel #team-theme-btn.active {
-    transform: translateY(-2px); /* Effet de survol standard */
+    transform: translateY(-2px);
     box-shadow: var(--shadow-lifted);
     border-color: var(--color-primary);
 }
@@ -160,8 +159,8 @@ h1 .highlight {
 /* Panneau flottant général (pour le manager et les paramètres) */
 .floating-panel {
     position: absolute;
-    top: calc(var(--header-height) + 15px); /* Ajustement pour être sous le header */
-    right: 25px; /* Positionné à droite par défaut */
+    top: calc(var(--header-height) + 15px);
+    right: 25px;
     z-index: 99;
     width: 450px;
     max-width: 90vw;
@@ -169,21 +168,21 @@ h1 .highlight {
     border-radius: 12px;
     box-shadow: var(--shadow-lifted);
     border: 1px solid var(--color-border);
-    padding: 20px; /* Ajout d'un padding pour le contenu */
+    padding: 20px;
     box-sizing: border-box;
     transition: all 0.2s ease-in-out;
 }
 
 /* Style spécifique pour le panneau du Playbook Manager (s'ouvre à gauche) */
 #play-manager-container { 
-    left: 25px; /* Positionnement à gauche */
-    right: auto; /* Annule le positionnement à droite */
-    border-top-left-radius: 0; /* Garde le coin supérieur gauche carré pour le bouton */
+    left: 25px;
+    right: auto;
+    border-top-left-radius: 0;
 }
 
 /* Style spécifique pour le panneau des Propriétés (Paramètres) */
 #properties-panel {
-    border-top-right-radius: 0; /* Garde le coin supérieur droit carré pour le bouton */
+    border-top-right-radius: 0;
 }
 
 .main-content {
@@ -278,7 +277,6 @@ body.dark-mode .btn-full-width:hover {
     border-color: var(--color-primary);
     background-color: var(--color-input-background);
 }
-/* FIN DES STYLES AJOUTÉS */
 
 .playbook-group label {
     font-weight: bold;
@@ -511,19 +509,19 @@ body.dark-mode .prop-info {
 @media (max-width: 800px) {
 
     .main-content {
-        flex-direction: column; /* Passe en mode colonne */
-        padding: 10px; /* Réduit l'espacement sur les côtés */
+        flex-direction: column;
+        padding: 10px;
         gap: 15px;
     }
 
     #sidebar {
-        width: 100%; /* La barre latérale prend toute la largeur */
-        order: 2; /* Change l'ordre pour mettre le terrain en premier */
+        width: 100%;
+        order: 2;
     }
 
     .main-area {
         width: 100%;
-        order: 1; /* Le terrain s'affiche avant les panneaux */
+        order: 1;
     }
     
     .app-header {
@@ -532,24 +530,22 @@ body.dark-mode .prop-info {
     }
 
     h1 {
-        font-size: 1.4em; /* Titre plus petit */
+        font-size: 1.4em;
         letter-spacing: 2px;
     }
     
     h1 .highlight {
-        display: none; /* Cache "TACTICAL BOARD" pour gagner de la place */
+        display: none;
     }
 
-    /* Le bouton Playbook n'affiche que l'icône */
     #toggle-playbook-manager-btn {
         padding: 0 12px;
-        bottom: -11px; /* Ajustement pour mobile */
+        bottom: -11px;
     }
     #toggle-playbook-manager-btn span {
         display: none;
     }
 
-    /* NOUVEAU : Cacher le crédit sur petit écran */
     #settings-panel .creator-credit {
         display: none;
     }
@@ -562,7 +558,7 @@ body.dark-mode .prop-info {
     bottom: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.6); /* Fond plus sombre pour masquer l'arrière-plan */
+    background-color: rgba(0,0,0,0.6);
     backdrop-filter: blur(5px);
     display: flex;
     align-items: center;
@@ -570,16 +566,15 @@ body.dark-mode .prop-info {
     padding: 10px;
     box-sizing: border-box;
     border-radius: 0;
-    border: none; /* Enlève la bordure du floating-panel lui-même */
+    border: none;
     box-shadow: none;
 }
 
-/* Style commun pour le contenu interne des modales flottantes */
-.floating-panel > * { /* Applique ces styles à l'enfant direct de .floating-panel, par exemple #play-manager ou #settings-panel */
+.floating-panel > * {
     width: 100%;
-    max-width: 450px; /* Limite la largeur du contenu de la modale */
-    max-height: 90vh; /* Limite la hauteur */
-    overflow-y: auto; /* Permet le défilement si le contenu est trop long */
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
     background-color: var(--color-container-background);
     padding: 25px;
     border-radius: 12px;
@@ -588,29 +583,24 @@ body.dark-mode .prop-info {
     box-sizing: border-box;
 }
 
-/* Spécifique pour le panneau du manager */
 #playbook-manager-panel {
-    left: 0; /* Annule les styles de positionnement absolu */
+    left: 0;
     right: 0;
-    border-top-left-radius: 12px; /* Réinitialise le rayon pour le mode modale */
+    border-top-left-radius: 12px;
 }
 
-/* Spécifique pour le panneau des propriétés */
 #properties-panel {
-    border-top-right-radius: 12px; /* Réinitialise le rayon pour le mode modale */
+    border-top-right-radius: 12px;
 }
 
-/* Masquer le bouton "toggle playbook manager" lorsqu'il est en mode modale */
 #toggle-playbook-manager-btn {
     display: none !important;
 }
 
-/* Assure que la modale est bien cachée */
 .floating-panel.hidden {
     display: none !important;
 }
 
-    /* Centre et style le contenu de la modale */
     #play-manager {
         width: 100%;
         max-width: 400px;
@@ -627,17 +617,17 @@ body.dark-mode .prop-info {
     }
     
     .floating-panel.hidden {
-        display: none !important; /* Assure que la modale est bien cachée */
+        display: none !important;
     }
 
     .view-half-court #court-container {
-        width: 100%; /* Le demi-terrain prend toute la largeur disponible */
+        width: 100%;
         aspect-ratio: 140 / 150;
         margin: 0 auto;
     }
     
     #toolbar {
-        gap: 8px; /* Espacement réduit entre les boutons d'outils */
+        gap: 8px;
     }
     .tool-group + .tool-group {
         padding-left: 8px;
@@ -722,26 +712,73 @@ body.dark-mode .help-content code {
     background-color: #333;
     color: #f5f5f5;
 }
-/* --- Fin des styles d'Aide --- */
+/* --- Styles pour le tableau de raccourcis (Aide) --- */
+.help-shortcuts-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    margin-bottom: 30px;
+    font-size: 0.95em;
+}
+
+.help-shortcuts-table th {
+    text-align: left;
+    border-bottom: 2px solid var(--color-border);
+    padding: 8px;
+    color: var(--color-secondary);
+    font-family: var(--font-title);
+    letter-spacing: 1px;
+}
+
+.help-shortcuts-table td {
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 8px;
+    color: var(--color-text);
+}
+
+/* Style style "touche de clavier" */
+.help-shortcuts-table .key {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+    font-family: monospace;
+    font-size: 0.9em;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Adaptation Mode Sombre pour le tableau */
+body.dark-mode .help-shortcuts-table th {
+    color: var(--color-primary);
+    border-color: var(--color-border);
+}
+
+body.dark-mode .help-shortcuts-table td {
+    color: var(--color-text-on-dark);
+    border-color: var(--color-border);
+}
+
+body.dark-mode .help-shortcuts-table .key {
+    background-color: #333;
+    border-color: #555;
+    color: #eee;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.5);
+}
 
 /* --- Mode CRAB (Thème Équipe) --- */
 body.crab-mode {
-    /* Remplace l'Or (#BFA98D) par le Bordeaux (#72243D) */
     --color-primary: #72243D; 
-    
-    /* Remplace le Noir (#212121) par le Jaune/Orange (#F9AB00) */
     --color-secondary: #F9AB00; 
-    
-    /* Ajustement pour le texte sur les boutons primaires (Bordeaux) -> Blanc */
     --color-button-text-on-gold: #FFFFFF; 
 }
 
-/* Ajustements spécifiques pour le mode Crab */
 body.crab-mode .app-header {
-    background-color: var(--color-secondary); /* Jaune */
+    background-color: var(--color-secondary);
 }
 
-/* Le texte sur fond jaune doit être noir pour le contraste */
 body.crab-mode .app-header h1, 
 body.crab-mode .header-right .btn-icon,
 body.crab-mode #toggle-playbook-manager-btn {
