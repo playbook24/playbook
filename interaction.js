@@ -1,7 +1,7 @@
 /**
  * interaction.js
  * Gère les entrées utilisateurs (Souris/Tactile).
- * CORRECTION : Réparation de l'outil TEXTE (prompt).
+ * CORRECTION SCROLL MOBILE : On ne bloque le scroll que si on dessine.
  */
 
 window.ORB.interactions = {
@@ -15,6 +15,7 @@ window.ORB.interactions = {
         window.addEventListener("mouseup", this.handleEnd.bind(this));
 
         // Tactile
+        // Note : On garde { passive: false } pour pouvoir empêcher le scroll quand on dessine
         canvas.addEventListener("touchstart", this.handleStart.bind(this), { passive: false });
         window.addEventListener("touchmove", this.handleMove.bind(this), { passive: false });
         window.addEventListener("touchend", this.handleEnd.bind(this));
@@ -35,7 +36,9 @@ window.ORB.interactions = {
 
     // --- DÉBUT DE L'ACTION ---
     handleStart: function(e) {
+        // Bloque le scroll uniquement si on touche le CANEVAS (le terrain)
         if (e.type === 'touchstart') e.preventDefault();
+        
         if (e.button === 2) return; 
 
         const appState = window.ORB.appState;
@@ -85,7 +88,6 @@ window.ORB.interactions = {
                     appState.dragStartElementState = JSON.stringify(appState.selectedElement);
                 }
             } 
-            // --- CORRECTION ICI : Gestion de l'outil TEXTE ---
             else if (appState.currentTool === "text") {
                 const text = prompt("Entrez votre texte :");
                 if (text) {
@@ -101,7 +103,6 @@ window.ORB.interactions = {
                     window.ORB.commitState();
                 }
             }
-            // -------------------------------------------------
             else if (singleClickTools.includes(appState.currentTool)) {
                 this.addSingleElement(logicalPos);
             }
@@ -113,9 +114,20 @@ window.ORB.interactions = {
     // --- MOUVEMENT ---
     handleMove: function(e) {
         const appState = window.ORB.appState;
-        if (!appState.isMouseDown && appState.inputMode !== 'mouse') return; 
         
-        if (e.type === 'touchmove') e.preventDefault();
+        // --- CORRECTIF SCROLL MOBILE ---
+        // Si c'est un mouvement tactile (touchmove)
+        if (e.type === 'touchmove') {
+            // Si on n'est PAS en train d'appuyer (pas de dessin en cours),
+            // on arrête la fonction ici et on laisse le navigateur scroller.
+            if (!appState.isMouseDown) return;
+
+            // Sinon (on appuie), on bloque le scroll pour dessiner
+            e.preventDefault();
+        }
+        // -------------------------------
+
+        if (!appState.isMouseDown && appState.inputMode !== 'mouse') return; 
 
         let logicalPos;
         if (e.touches && e.touches.length > 0) {
