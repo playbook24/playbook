@@ -25,6 +25,7 @@ body {
     box-sizing: border-box;
     transition: background-color 0.3s ease, color 0.3s ease;
     line-height: 1.6;
+    overscroll-behavior-y: none; /* Empêche le rebond élastique sur mobile */
 }
 
 .app-header {
@@ -505,28 +506,61 @@ body.dark-mode .prop-info {
     opacity: 0.7;
 }
 
-/* --- Media Queries pour le Responsive --- */
-@media (max-width: 800px) {
+/* --- Mode CRAB (Thème Équipe) --- */
+body.crab-mode {
+    --color-primary: #72243D; 
+    --color-secondary: #F9AB00; 
+    --color-button-text-on-gold: #FFFFFF; 
+}
 
+body.crab-mode .app-header {
+    background-color: var(--color-secondary);
+}
+
+body.crab-mode .app-header h1, 
+body.crab-mode .header-right .btn-icon,
+body.crab-mode #toggle-playbook-manager-btn {
+    color: #212121; 
+}
+
+body.crab-mode #toggle-playbook-manager-btn:hover {
+     background-color: rgba(0, 0, 0, 0.1);
+     color: var(--color-primary);
+}
+
+/* --- Media Queries pour le Responsive --- */
+@media (max-width: 1024px) {
+
+    /* 1. LAYOUT : Terrain toujours en haut */
     .main-content {
         flex-direction: column;
-        padding: 10px;
-        gap: 15px;
+        padding: 5px;
+        gap: 10px;
+        width: 100%;
+        overflow-x: hidden;
     }
 
     #sidebar {
         width: 100%;
         order: 2;
+        padding: 15px;
+        padding-bottom: 100px;
     }
 
     .main-area {
         width: 100%;
         order: 1;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--color-background);
+        border-bottom: 1px solid var(--color-border);
+        padding-bottom: 5px;
     }
     
     .app-header {
-        padding: 10px 15px;
-        margin-bottom: 10px;
+        padding: 8px 15px;
+        margin-bottom: 0;
     }
 
     h1 {
@@ -540,128 +574,134 @@ body.dark-mode .prop-info {
 
     #toggle-playbook-manager-btn {
         padding: 0 12px;
-        bottom: -11px;
+        bottom: -8px;
     }
     #toggle-playbook-manager-btn span {
         display: none;
     }
 
-    #settings-panel .creator-credit {
-        display: none;
-    }
-    
-.floating-panel {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.6);
-    backdrop-filter: blur(5px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    box-sizing: border-box;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-}
+    /* La ligne qui cachait les crédits a été supprimée ici */
 
-.floating-panel > * {
-    width: 100%;
-    max-width: 450px;
-    max-height: 90vh;
-    overflow-y: auto;
-    background-color: var(--color-container-background);
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: var(--shadow-lifted);
-    border: 1px solid var(--color-border);
-    box-sizing: border-box;
-}
-
-#playbook-manager-panel {
-    left: 0;
-    right: 0;
-    border-top-left-radius: 12px;
-}
-
-#properties-panel {
-    border-top-right-radius: 12px;
-}
-
-#toggle-playbook-manager-btn {
-    display: none !important;
-}
-
-.floating-panel.hidden {
-    display: none !important;
-}
-
-    #play-manager {
-        width: 100%;
-        max-width: 400px;
-        background-color: var(--color-container-background);
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: var(--shadow-lifted);
-        border: 1px solid var(--color-border);
-    }
-
-    .dark-mode .floating-panel:not(.hidden) #play-manager {
-         background-color: var(--color-container-background);
-         border-color: var(--color-border);
-    }
-    
-    .floating-panel.hidden {
-        display: none !important;
-    }
-
-    .view-half-court #court-container {
-        width: 100%;
-        aspect-ratio: 140 / 150;
-        margin: 0 auto;
-    }
-    
+    /* BARRE D'OUTILS : SCROLLABLE */
     #toolbar {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 5px;
         gap: 8px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        justify-content: flex-start;
     }
-    .tool-group + .tool-group {
-        padding-left: 8px;
-        margin-left: 3px;
+    #toolbar::-webkit-scrollbar { display: none; }
+    
+    .tool-group { flex-shrink: 0; }
+    .tool-btn { flex-shrink: 0; width: 44px; height: 44px; }
+
+    /* PANNEAU PROPRIÉTÉS : BOTTOM SHEET */
+    #properties-panel {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        max-height: 45vh;
+        overflow-y: auto;
+        z-index: 1000;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+        border: 1px solid var(--color-border);
+        border-bottom: none;
+        padding: 20px;
+        background-color: var(--color-container-background);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform: translateY(0);
+    }
+    
+    #properties-panel.hidden {
+        display: block !important;
+        transform: translateY(110%);
+        pointer-events: none;
+    }
+    
+    #properties-panel::before {
+        content: ''; display: block; width: 40px; height: 5px;
+        background-color: var(--color-border); border-radius: 3px;
+        margin: -10px auto 15px auto;
     }
 
-    #animation-container {
-        max-width: 95vw;
-        max-height: 70vh;
+    /* SCÈNES */
+    #scene-list {
+        display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 10px; max-height: none; padding-bottom: 10px;
     }
-    #animation-controls {
-        flex-wrap: wrap;
-        justify-content: center;
-        padding: 8px;
+    #scene-list li {
+        min-width: 120px; flex-shrink: 0; justify-content: center; text-align: center;
     }
     
-    .header-right {
-        gap: 5px;
+    /* MODALES PLEIN ÉCRAN MOBILE */
+    .floating-panel {
+        position: fixed;
+        top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+        width: 100% !important; height: 100% !important; max-width: 100%; max-height: 100vh;
+        border-radius: 0; z-index: 2000;
+        background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+        display: flex; align-items: center; justify-content: center; padding: 0;
     }
-    .header-right .btn-icon {
-        padding: 0 5px;
+
+    .floating-panel > * {
+        width: 100%; max-width: 100%; height: 100%; overflow-y: auto;
+        background-color: var(--color-container-background);
+        padding: 20px; border-radius: 0; box-shadow: none; border: none;
+    }
+
+    /* BOUTONS FERMETURE */
+    #toggle-playbook-manager-btn.active,
+    #toggle-settings-btn.active {
+        z-index: 2001; position: fixed; top: 10px; right: 10px;
+        background-color: var(--color-primary); color: white;
+        border-radius: 50%; width: 40px; height: 40px; padding: 0;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    #toggle-playbook-manager-btn.active svg { margin: 0; }
+    
+    /* AUTRES */
+    .view-half-court #court-container { width: 100%; aspect-ratio: 140 / 150; margin: 0 auto; }
+    #animation-container { max-width: 100vw; max-height: 60vh; width: 100%; border-radius: 0; }
+    #animation-controls { flex-wrap: wrap; justify-content: center; padding: 8px; width: 100%; box-sizing: border-box; }
+    .header-right { gap: 5px; }
+    .header-right .btn-icon { padding: 0 5px; }
+    .view-header { padding: 10px 15px; }
+    .view-header h2 { font-size: 1.3em; }
+    .view-content { padding: 15px; }
+}
+
+/* --- MODE PAYSAGE (MOBILE) --- */
+@media (max-height: 500px) and (orientation: landscape) {
+    /* Navbar compacte mais VISIBLE */
+    .app-header {
+        display: flex !important;
+        padding: 2px 15px;
+        height: 40px;
+        min-height: 40px;
+        margin-bottom: 5px;
     }
     
-    @media (max-width: 800px) {
-        .view-header {
-            padding: 10px 15px;
-        }
-         .view-header h2 {
-            font-size: 1.3em;
-        }
-        .view-content {
-            padding: 15px;
-        }
+    /* On cache le titre au centre */
+    .header-center { display: none; }
+    
+    .header-content { height: 100%; }
+    
+    /* Boutons réduits */
+    .header-right .btn-icon, #toggle-playbook-manager-btn {
+        height: 30px; padding: 0 8px;
     }
+    #toggle-playbook-manager-btn { bottom: 0; height: 100%; border-radius: 0; }
+    
+    .main-content { padding: 0; }
+    .main-area { padding-bottom: 2px; }
+    
+    /* Sidebar à droite ou en bas selon préférence */
+    #sidebar { padding-bottom: 20px; }
 }
 
 /* --- NOUVEAU : Styles pour la fenêtre d'Aide --- */
@@ -768,27 +808,6 @@ body.dark-mode .help-shortcuts-table .key {
     box-shadow: 0 2px 0 rgba(0,0,0,0.5);
 }
 
-/* --- Mode CRAB (Thème Équipe) --- */
-body.crab-mode {
-    --color-primary: #72243D; 
-    --color-secondary: #F9AB00; 
-    --color-button-text-on-gold: #FFFFFF; 
-}
-
-body.crab-mode .app-header {
-    background-color: var(--color-secondary);
-}
-
-body.crab-mode .app-header h1, 
-body.crab-mode .header-right .btn-icon,
-body.crab-mode #toggle-playbook-manager-btn {
-    color: #212121; 
-}
-
-body.crab-mode #toggle-playbook-manager-btn:hover {
-     background-color: rgba(0, 0, 0, 0.1);
-     color: var(--color-primary);
-}
 /* --- OPTIMISATION MOBILE & TABLETTE --- */
 
 /* Empêcher le scroll quand on touche le canvas */
@@ -796,97 +815,6 @@ body.crab-mode #toggle-playbook-manager-btn:hover {
     touch-action: none;
 }
 
-@media (max-width: 1024px) {
-    /* Réorganisation globale en colonne */
-    .main-content {
-        flex-direction: column;
-        padding: 10px;
-        gap: 15px;
-    }
-
-    /* Le terrain prend toute la largeur */
-    .main-area {
-        width: 100%;
-        order: 1; /* Le terrain en premier */
-    }
-
-    /* La barre latérale passe en dessous */
-    #sidebar {
-        width: 100%;
-        order: 2;
-        display: flex;
-        flex-direction: column; /* Garde les éléments les uns sous les autres */
-    }
-
-    /* Ajustement des outils pour qu'ils soient plus faciles à toucher */
-    .tool-btn {
-        min-width: 44px; /* Standard tactile Apple/Android */
-        height: 44px;
-        padding: 8px;
-    }
-
-    /* Barre d'outils défilable horizontalement si trop d'outils */
-    #toolbar {
-        overflow-x: auto;
-        padding-bottom: 5px;
-        flex-wrap: nowrap; /* Force une seule ligne */
-        justify-content: flex-start;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .tool-group {
-        flex-shrink: 0; /* Empêche l'écrasement des groupes */
-    }
-
-    /* Panneaux Flottants (Settings/Manager) en Plein Écran sur mobile */
-    .floating-panel {
-        position: fixed;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100%;
-        max-width: 100%;
-        height: 100vh;
-        max-height: 100vh;
-        border-radius: 0;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        padding: 0;
-    }
-    
-    /* Contenu interne des panneaux mobile */
-    .floating-panel > div {
-        padding: 20px;
-        overflow-y: auto;
-        height: 100%;
-    }
-
-    /* Bouton fermeture pour les panneaux flottants (on réutilise le style header) */
-    #toggle-playbook-manager-btn.active,
-    #toggle-settings-btn.active {
-        z-index: 1001; /* Au-dessus du panneau plein écran */
-        position: fixed;
-        top: 10px;
-        right: 10px;
-    }
-    
-    /* Cacher le header quand un panneau est ouvert pour gagner de la place */
-    body:has(.floating-panel:not(.hidden)) .app-header {
-        display: none;
-    }
-}
-
-/* Mode Paysage sur Mobile (Souvent trop petit en hauteur) */
-@media (max-height: 500px) and (orientation: landscape) {
-    .app-header {
-        display: none; /* On cache le header pour laisser la place au terrain */
-    }
-    .main-content {
-        padding: 5px;
-    }
-}
 /* --- CORRECTIF POLICE PDF (Logo Central) --- */
 .center-court-logo text {
     /* On ajoute Impact et Arial Black en secours pour l'export PDF */

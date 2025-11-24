@@ -1,6 +1,7 @@
 /**
  * manager.css
  * Styles pour la bibliothèque (Version Tags Gérés v4.2)
+ * Optimisé Mobile : Scroll horizontal pour les filtres
  */
 
 /* --- Styles des boutons du Header (Inchangé) --- */
@@ -95,6 +96,7 @@ body.dark-mode .view-header h2 {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
+    padding-bottom: 80px; /* Espace scroll mobile */
 }
 .library-empty-message {
     grid-column: 1 / -1;
@@ -159,7 +161,7 @@ body.dark-mode .card-info p {
     color: var(--color-text-on-dark);
 }
 
-/* --- NOUVEAU : Styles pour les Tags sur la carte --- */
+/* --- Styles pour les Tags sur la carte --- */
 .card-tags {
     padding: 0 15px 10px 15px; /* Espace avant les actions */
     display: flex;
@@ -181,7 +183,6 @@ body.dark-mode .card-tags span {
     color: var(--color-text-on-dark);
     border-color: #444;
 }
-/* --- FIN Styles Tags Carte --- */
 
 .card-actions {
     display: flex;
@@ -197,14 +198,13 @@ body.dark-mode .card-tags span {
     padding: 6px;
     min-width: 35px;
 }
-/* NOUVEAU : Bouton "Assigner Tags" */
 .card-btn-assign-tags {
     flex-grow: 0; /* Ne grandit pas */
     min-width: 35px;
     width: 35px;
 }
 
-/* --- NOUVEAU : Barre de Contrôles Bibliothèque --- */
+/* --- Barre de Contrôles Bibliothèque (MODIFIÉE POUR SCROLL MOBILE) --- */
 .library-controls {
     display: flex;
     justify-content: space-between;
@@ -214,12 +214,12 @@ body.dark-mode .card-tags span {
     background-color: var(--color-container-background);
     border: 1px solid var(--color-border);
     border-radius: 12px;
-    flex-wrap: wrap; /* Permet aux filtres de passer à la ligne */
+    flex-wrap: wrap; /* Défaut pour Desktop */
     gap: 8px;
 }
 .filter-bar {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Défaut pour Desktop */
     gap: 8px;
     flex-grow: 1;
 }
@@ -229,12 +229,10 @@ body.dark-mode .card-tags span {
 }
 #btn-manage-tags {
     height: 35px;
-    flex-shrink: 0; /* Empêche le bouton de rétrécir */
+    flex-shrink: 0;
 }
 
-/* --- NOUVEAU : Styles pour les Modales de Tags --- */
-
-/* Liste des tags dans "Gérer les Tags" */
+/* --- MODALE : Styles pour les Tags --- */
 .tag-management-list {
     list-style: none;
     padding: 0;
@@ -254,44 +252,67 @@ body.dark-mode .card-tags span {
     border-bottom: 1px solid var(--color-border);
 }
 .tag-management-list .tag-delete-btn {
-    width: 30px;
-    height: 30px;
-    min-width: 30px;
-    padding: 4px;
+    width: 30px; height: 30px; min-width: 30px; padding: 4px;
 }
 
-/* Liste des tags dans "Assigner les Tags" */
 .tag-assign-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 15px;
-    max-height: 50vh;
-    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 10px;
+    border: 1px solid var(--color-border); border-radius: 8px;
+    padding: 15px; max-height: 50vh; overflow-y: auto;
 }
 .tag-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.1em;
-    padding: 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.1em; padding: 8px; border-radius: 6px;
+    cursor: pointer; transition: background-color 0.2s ease;
 }
-.tag-checkbox-label:hover {
-    background-color: var(--color-background);
-}
-body.dark-mode .tag-checkbox-label:hover {
-    background-color: #2a2a2a;
-}
-.tag-checkbox-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
+.tag-checkbox-label:hover { background-color: var(--color-background); }
+body.dark-mode .tag-checkbox-label:hover { background-color: #2a2a2a; }
+.tag-checkbox-label input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
 
-/* --- SUPPRESSION DES ANCIENS STYLES DE DOSSIER --- */
-/* Tous les styles pour .folder-card, .breadcrumb-nav, .library-drop-hint, .dragging, .drag-over ont été supprimés */
+
+/* --- OPTIMISATION MOBILE (Tablette & Smartphone) --- */
+@media (max-width: 1024px) {
+    
+    .library-controls {
+        flex-direction: column; /* Empiler : Liste tags en haut, Bouton "Gérer" en bas */
+        align-items: stretch;   /* Prendre toute la largeur */
+        gap: 12px;
+        padding: 10px;
+    }
+
+    /* SCROLL HORIZONTAL DES TAGS */
+    .filter-bar {
+        display: flex;
+        flex-wrap: nowrap;      /* IMPORTANT: Ne pas passer à la ligne */
+        overflow-x: auto;       /* IMPORTANT: Activer le scroll horizontal */
+        padding-bottom: 5px;
+        gap: 8px;
+        
+        /* Expérience native */
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .filter-bar::-webkit-scrollbar { 
+        display: none; 
+    }
+
+    .filter-bar button {
+        flex-shrink: 0;         /* Empêche les boutons de s'écraser */
+        white-space: nowrap;    /* Le texte reste sur une ligne */
+    }
+
+    /* Bouton "Gérer les tags" large et facile à cliquer */
+    #btn-manage-tags {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .view-header {
+        padding: 10px 15px;
+    }
+    .view-content {
+        padding: 15px;
+        padding-bottom: 80px; /* Espace en bas pour éviter d'être caché par la navbar navigateur */
+    }
+}

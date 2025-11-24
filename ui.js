@@ -124,7 +124,18 @@ window.ORB.ui = {
             window.ORB.commitState();
         });
         
-        document.getElementById('show-help-btn').addEventListener('click', () => document.getElementById('help-view').classList.remove('hidden'));
+        document.getElementById('show-help-btn').addEventListener('click', () => {
+    // 1. Ouvrir l'aide
+    document.getElementById('help-view').classList.remove('hidden');
+    
+    // 2. Fermer le panneau des paramètres (si ouvert)
+    document.getElementById('settings-panel').classList.add('hidden');
+    document.getElementById('toggle-settings-btn').classList.remove('active');
+    
+    // 3. (Optionnel) Fermer aussi le manager s'il était ouvert (peu probable ici mais propre)
+    document.getElementById('play-manager-container').classList.add('hidden');
+    document.getElementById('toggle-playbook-manager-btn').classList.remove('active');
+});
         document.getElementById('help-close-btn').addEventListener('click', () => document.getElementById('help-view').classList.add('hidden'));
     },
 
