@@ -1,7 +1,6 @@
 /**
  * ui.js
- * Gestion de l'interface utilisateur (Panneaux, Boutons, Exports, Thèmes).
- * VERSION FINALE : Inclut le Backup Global.
+ * Gestion de l'interface utilisateur.
  */
 
 window.ORB.ui = {
@@ -14,9 +13,43 @@ window.ORB.ui = {
         this.bindExports();
         this.bindTheme();
         this.initColorPalettes();
+        this.bindInputMode();
     },
 
-    // --- GESTION DES PANNEAUX FLOTTANTS ---
+    // --- GESTION DU BOUTON SOURIS / STYLET ---
+    bindInputMode: function() {
+        const btn = document.getElementById('input-mode-btn');
+        const iconMouse = document.getElementById('icon-mode-mouse');
+        const iconStylus = document.getElementById('icon-mode-stylus');
+        
+        const updateModeUI = () => {
+            const mode = window.ORB.appState.inputMode;
+            const isStylus = mode === 'stylus';
+            
+            // Bascule des icônes
+            iconMouse.classList.toggle('hidden', isStylus);
+            iconStylus.classList.toggle('hidden', !isStylus);
+            
+            btn.classList.toggle('active', isStylus);
+            btn.title = isStylus ? "Mode Stylet : Dessin libre" : "Mode Souris : Point à point";
+        };
+
+        // Charger la préférence
+        const savedMode = localStorage.getItem('inputMode');
+        if (savedMode) {
+            window.ORB.appState.inputMode = savedMode;
+        }
+        updateModeUI();
+
+        btn.addEventListener('click', () => {
+            const current = window.ORB.appState.inputMode;
+            const newMode = current === 'mouse' ? 'stylus' : 'mouse';
+            window.ORB.appState.inputMode = newMode;
+            localStorage.setItem('inputMode', newMode);
+            updateModeUI();
+        });
+    },
+
     toggleFloatingPanel: function(panel, button) {
         const isOpening = panel.classList.contains('hidden');
         document.querySelectorAll('.floating-panel').forEach(p => p.classList.add('hidden'));
@@ -452,7 +485,6 @@ window.ORB.ui = {
                 container.appendChild(d);
             });
         };
-        
         createPalette('player-props', ['#d32f2f', '#007bff', '#28a745', '#ffc107', '#343a40', '#f8f9fa']);
         createPalette('defender-props', ['#d32f2f', '#007bff', '#28a745', '#ffc107', '#343a40', '#f8f9fa']);
         createPalette('path-props', ['#d32f2f', '#007bff', '#28a745', '#ffc107', '#343a40', '#f8f9fa']);
@@ -468,10 +500,7 @@ window.ORB.ui = {
         document.getElementById('action-redo').disabled = window.ORB.redoStack.length === 0;
     },
 
-    // --- EXPORTS & SAUVEGARDES ---
     bindExports: function() {
-        
-        // Save File (.json)
         document.getElementById('save-file-btn').addEventListener('click', () => {
             const blob = new Blob([JSON.stringify(window.ORB.playbookState, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -479,8 +508,6 @@ window.ORB.ui = {
             a.href = url; a.download = `${window.ORB.playbookState.name.trim() || 'playbook'}.json`;
             document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
         });
-
-        // Load File
         const fileInput = document.getElementById('import-file-input');
         document.getElementById('load-file-btn').addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (e) => {
@@ -512,37 +539,28 @@ window.ORB.ui = {
             reader.readAsText(file);
             e.target.value = '';
         });
-
-        // Save to Library
         document.getElementById('save-to-library-btn').addEventListener('click', async () => {
             const btn = document.getElementById('save-to-library-btn');
             btn.disabled = true; btn.textContent = "Sauvegarde...";
-            
             try {
                 const blob = await new Promise(resolve => {
                     html2canvas(document.getElementById('court-container'), { scale: 0.4, useCORS: true, logging: false })
                         .then(c => c.toBlob(b => resolve(b), 'image/jpeg', 0.7));
                 });
-                
                 const id = await orbDB.savePlaybook(window.ORB.playbookState, blob, window.ORB.appState.currentLoadedPlaybookId);
                 window.ORB.appState.currentLoadedPlaybookId = id;
                 alert(`Playbook "${window.ORB.playbookState.name}" sauvegardé !`);
-                
                 if (!document.getElementById('library-view').classList.contains('hidden')) {
                     document.getElementById('show-library-btn').click();
                 }
             } catch(e) { console.error(e); alert("Erreur sauvegarde."); }
             finally { btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17 3H7C5.9 3 5 3.9 5 5V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V5C19 3.9 18.1 3 17 3M17 19H7V5H17V19M12 9L10 11H13V15H11V13L9 15L11 17V15H15V11H13L15 9H12Z"/></svg> Sauvegarder'; }
         });
-
-        // --- BOUTON BACKUP GLOBAL (AJOUTÉ) ---
         document.getElementById('export-all-data-btn').addEventListener('click', async () => {
             const button = document.getElementById('export-all-data-btn');
             const originalHtml = button.innerHTML;
             button.disabled = true;
             button.textContent = 'Préparation...';
-
-            // Helper pour convertir Blob en Base64 (nécessaire pour le JSON)
             const blobToDataURL = (blob) => {
                 return new Promise((resolve) => {
                     if (!blob || !(blob instanceof Blob)) { resolve(null); return; }
@@ -551,53 +569,31 @@ window.ORB.ui = {
                     reader.readAsDataURL(blob);
                 });
             };
-
             try {
                 const playbooks = await orbDB.getAllPlaybooks();
                 const tags = await orbDB.getAllTags();
                 const plans = await orbDB.getAllPlans();
-
-                // Conversion des aperçus (Blobs) en texte (Base64)
                 const serializablePlaybooks = await Promise.all(
                     playbooks.map(async (pb) => {
                         const previewDataUrl = await blobToDataURL(pb.preview);
                         return { ...pb, preview: previewDataUrl };
                     })
                 );
-
                 const allData = {
                     version: "orb_backup_v1",
                     createdAt: new Date().toISOString(),
-                    data: {
-                        playbooks: serializablePlaybooks,
-                        tags: tags,
-                        trainingPlans: plans
-                    }
+                    data: { playbooks: serializablePlaybooks, tags: tags, trainingPlans: plans }
                 };
-
                 const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url;
-                a.download = `orb_backup_${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-            } catch (error) {
-                console.error("Erreur Backup:", error);
-                alert("Erreur lors du backup.");
-            } finally {
-                button.disabled = false;
-                button.innerHTML = originalHtml;
-            }
+                a.href = url; a.download = `orb_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+            } catch (error) { console.error("Erreur Backup:", error); alert("Erreur lors du backup."); } 
+            finally { button.disabled = false; button.innerHTML = originalHtml; }
         });
-        
-        // Export PDF
         document.getElementById('export-pdf-btn').addEventListener("click", async () => {
              if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') return alert("Erreur lib PDF.");
-             
              const { jsPDF } = window.jspdf;
              const pbState = window.ORB.playbookState; 
              const originalIndex = pbState.activeSceneIndex;
@@ -605,17 +601,14 @@ window.ORB.ui = {
              const MARGIN = 15;
              const PAGE_WIDTH = doc.internal.pageSize.getWidth();
              const PAGE_HEIGHT = doc.internal.pageSize.getHeight();
-             
              const isCrab = document.body.classList.contains('crab-mode');
              const COLORS = window.ORB.CONSTANTS.COLORS;
              const PRIMARY = isCrab ? COLORS.crabPrimary : COLORS.primary;
              const TEXT = isCrab ? COLORS.crabPrimary : '#212121';
              const SEC = isCrab ? COLORS.crabSecondary : '#212121';
-
              const playName = pbState.name || "Playbook";
              let scenesPerPage = parseInt(document.getElementById('pdf-scenes-per-page').value, 10) || 1;
              if (scenesPerPage < 1 || scenesPerPage > 6) scenesPerPage = 1;
-             
              const addHeader = (doc, title) => {
                 doc.setFillColor(PRIMARY);
                 doc.rect(0, 0, PAGE_WIDTH, MARGIN + 5, 'F');
@@ -626,25 +619,19 @@ window.ORB.ui = {
                 doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.setTextColor(150);
                 doc.text(`Page ${pageNum} / ${totalPages}`, PAGE_WIDTH / 2, PAGE_HEIGHT - (MARGIN / 2), { align: "center" });
              };
-             
              const layoutConfig = { 1: {rows:1,cols:1}, 2:{rows:2,cols:1}, 3:{rows:3,cols:1}, 4:{rows:2,cols:2}, 5:{rows:3,cols:2}, 6:{rows:3,cols:2} }[scenesPerPage > 4 ? 6 : scenesPerPage];
              const totalScenePages = Math.ceil(pbState.scenes.length / scenesPerPage);
-
              if (pbState.scenes.length === 0) return alert("Aucune scène.");
-
              for (let i = 0; i < pbState.scenes.length; i++) {
                 const pageIndex = Math.floor(i / scenesPerPage);
                 const sceneIndexOnPage = i % scenesPerPage;
-
                 if (sceneIndexOnPage === 0) {
                     if (i > 0) doc.addPage();
                     addHeader(doc, playName);
                     addFooter(doc, pageIndex + 1, totalScenePages);
                 }
-                
                 await this.switchToScene(i, true);
                 await new Promise(r => setTimeout(r, 50));
-
                 const courtImage = await html2canvas(document.getElementById('court-container'), { scale: 1.5, backgroundColor: null });
                 const cellWidth = (PAGE_WIDTH - MARGIN * (layoutConfig.cols + 1)) / layoutConfig.cols;
                 const cellHeight = (PAGE_HEIGHT - MARGIN * 4) / layoutConfig.rows;
@@ -652,20 +639,17 @@ window.ORB.ui = {
                 const rowIndex = Math.floor(sceneIndexOnPage / layoutConfig.cols);
                 const cellX = MARGIN + colIndex * (cellWidth + MARGIN);
                 const cellY = MARGIN * 2.5 + rowIndex * (cellHeight + MARGIN);
-
                 doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(TEXT);
                 const sceneTitle = pbState.scenes[i].name || `Scène ${i + 1}`;
                 doc.text(sceneTitle, cellX, cellY);
                 doc.setDrawColor(isCrab ? SEC : PRIMARY); doc.setLineWidth(0.5);
                 doc.line(cellX, cellY + 1, cellX + 30, cellY + 1);
-
                 const diagramHeightRatio = 0.6;
                 const diagramContainerHeight = cellHeight * diagramHeightRatio;
                 const imgData = courtImage.toDataURL("image/jpeg", 0.8);
                 const imgHeight = Math.min(diagramContainerHeight - 5, courtImage.height * cellWidth / courtImage.width);
                 const imgWidth = courtImage.width * imgHeight / courtImage.height;
                 doc.addImage(imgData, "JPEG", cellX, cellY + 5, imgWidth, imgHeight, undefined, 'FAST');
-
                 const commentsY = cellY + diagramContainerHeight + 3;
                 const comments = pbState.scenes[i].comments;
                 if (comments) {
@@ -673,11 +657,9 @@ window.ORB.ui = {
                     doc.text(doc.splitTextToSize(comments, cellWidth - 4), cellX + 2, commentsY + 4);
                 }
              }
-
              doc.save(`${playName}.pdf`);
              await this.switchToScene(originalIndex);
         });
-
         document.getElementById('export-video-btn').addEventListener('click', () => window.ORB.animation.exportVideo());
     },
 
@@ -690,13 +672,11 @@ window.ORB.ui = {
         };
         const saved = localStorage.getItem('theme') || 'light';
         updateTheme(saved);
-        
         document.getElementById('theme-toggle-btn').addEventListener('click', () => {
             const newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
             localStorage.setItem('theme', newTheme);
             updateTheme(newTheme);
         });
-
         const teamBtn = document.getElementById('team-theme-btn');
         const updateTeamUI = (isCrab) => {
             if (isCrab) {
@@ -724,9 +704,7 @@ window.ORB.ui = {
             }
             window.ORB.renderer.redrawCanvas();
         };
-        
         if (localStorage.getItem('teamMode') === 'crab') updateTeamUI(true);
-        
         teamBtn.addEventListener('click', () => {
             const isCrab = !document.body.classList.contains('crab-mode');
             localStorage.setItem('teamMode', isCrab ? 'crab' : 'orb');

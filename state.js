@@ -1,11 +1,9 @@
 /**
  * state.js
- * Contient l'état global de l'application et la configuration.
- * Doit être chargé en PREMIER.
+ * État global.
  */
 
 window.ORB = {
-    // --- CONSTANTES ---
     CONSTANTS: {
         LOGICAL_WIDTH: 280,
         LOGICAL_HEIGHT: 150,
@@ -23,7 +21,6 @@ window.ORB = {
         }
     },
 
-    // --- ÉTAT DU PLAYBOOK (Données sauvegardées) ---
     playbookState: {
         name: "Playbook",
         scenes: [{
@@ -33,18 +30,17 @@ window.ORB = {
             durationOverride: null 
         }],
         activeSceneIndex: 0,
-        animationSettings: {
-            speed: 50, // Valeur par défaut
-            ratio: 0.3, // Valeur par défaut
-        }
+        animationSettings: { speed: 50, ratio: 0.3 }
     },
 
-    // --- ÉTAT DE L'APPLICATION (Volatile) ---
     appState: {
-        currentLoadedPlaybookId: null, // ID pour la base de données
+        currentLoadedPlaybookId: null,
         currentTool: 'select',
         
-        // Sélection & Interaction
+        // 'mouse' (Point à point) ou 'stylus' (Tracé libre)
+        inputMode: 'mouse', 
+        smoothingDistance: 5, // Distance min entre 2 points pour le mode stylet (lissage)
+
         selectedElement: null,
         selectedScene: null,
         dragStartElementState: null,
@@ -52,21 +48,16 @@ window.ORB = {
         isDrawing: false,
         isMouseDown: false,
         
-        // Dessin temporaire
         currentPath: [],
         startDragPos: { x: 0, y: 0 },
         lastMousePos: { x: 0, y: 0 },
-        tempElement: null, // Pour la zone rectangulaire lors du tracé
+        tempElement: null,
         
-        // Gestion des IDs
         playerCounter: 1,
         defenderCounter: 1,
-
-        // Drag & Drop des scènes
         draggedSceneIndex: null
     },
 
-    // --- ÉTAT DE L'ANIMATION ---
     animationState: {
         isPlaying: false,
         isFinished: false,
@@ -80,77 +71,49 @@ window.ORB = {
         activeHalf: 'left'
     },
 
-    // --- HISTORIQUE (Undo/Redo) ---
     history: [],
     redoStack: [],
     isRestoringState: false,
 
-    // --- RÉFÉRENCES GLOBALES (Remplies par main.js) ---
-    canvas: null,
-    ctx: null,
-    animCanvas: null,
-    animCtx: null,
+    canvas: null, ctx: null, animCanvas: null, animCtx: null,
     
-    // --- FONCTIONS DE GESTION D'ÉTAT ---
-    
-    // Sauvegarde l'état actuel dans l'historique
     commitState: function() {
         if (this.isRestoringState) return;
-        // Copie profonde de l'état du playbook
         const stateCopy = JSON.parse(JSON.stringify(this.playbookState));
         this.history.push(stateCopy);
         this.redoStack = [];
-        
-        // Limite la taille de l'historique
-        if (this.history.length > 50) {
-            this.history.shift();
-        }
-        
-        // Met à jour les boutons UI (Fonction définie dans ui.js)
-        if (this.ui && this.ui.updateUndoRedoButtons) {
-            this.ui.updateUndoRedoButtons();
-        }
+        if (this.history.length > 50) this.history.shift();
+        if (this.ui && this.ui.updateUndoRedoButtons) this.ui.updateUndoRedoButtons();
     },
 
-    // Annuler
     undo: function() {
         if (this.history.length <= 1) return;
         this.isRestoringState = true;
-        
         const currentState = this.history.pop();
         this.redoStack.push(currentState);
-        
         const prevState = this.history[this.history.length - 1];
         this.playbookState = JSON.parse(JSON.stringify(prevState));
-        
-        // Mise à jour de l'interface
         if (this.ui) {
             const nameInput = document.getElementById('play-name-input');
             if (nameInput) nameInput.value = this.playbookState.name;
             this.ui.switchToScene(this.playbookState.activeSceneIndex, true);
             this.ui.updateUndoRedoButtons();
         }
-        
         this.isRestoringState = false;
     },
 
-    // Rétablir
     redo: function() {
         if (this.redoStack.length === 0) return;
         this.isRestoringState = true;
-        
         const nextState = this.redoStack.pop();
         this.history.push(nextState);
         this.playbookState = JSON.parse(JSON.stringify(nextState));
-        
-        // Mise à jour de l'interface
         if (this.ui) {
             const nameInput = document.getElementById('play-name-input');
             if (nameInput) nameInput.value = this.playbookState.name;
             this.ui.switchToScene(this.playbookState.activeSceneIndex, true);
             this.ui.updateUndoRedoButtons();
         }
-        
         this.isRestoringState = false;
     }
 };

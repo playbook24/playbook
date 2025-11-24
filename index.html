@@ -2,8 +2,15 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">    <title>ORB Playbook</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ORB Playbook</title>
+    
     <link rel="icon" href="logo.png" type="image/png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#212121">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -61,7 +68,7 @@
                         <span>Sauvegarder TOUT (Backup)</span>
                     </button>
                 </div>
-                </div>
+            </div>
 
             <div class="playbook-group">
                 <label>Bibliothèque</label>
@@ -103,6 +110,18 @@
                     <svg viewBox="0 0 24 24"><path d="M12,2L4,5V11C4,16.55 7.4,21.74 12,23C16.6,21.74 20,16.55 20,11V5L12,2M12,11.9C12,14.2 10.2,16 8,16C5.8,16 4,14.2 4,11.9H12ZM12,11.9C12,9.7 13.8,7.9 16,7.9C18.2,7.9 20,9.7 20,11.9H12Z" fill="currentColor"/></svg>
                 </button>
             </div>
+            
+            <div class="settings-row" style="margin-top: 10px;">
+                <span>Mode de Tracé</span>
+                <button id="input-mode-btn" title="Changer le mode de tracé">
+                    <svg id="icon-mode-mouse" viewBox="0 0 24 24"><path d="M13,1.07V9H20C20,4.61 16.43,1.07 13,1.07M13,11V19H20C20,14.61 16.43,11 13,11M11,19V11H4C4,14.61 7.57,19 11,19M11,9V1.07C7.57,1.07 4,4.61 11,9Z" /></svg>
+                    <svg id="icon-mode-stylus" class="hidden" viewBox="0 0 24 24"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C17.98,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25Z" /></svg>
+                </button>
+            </div>
+            <p style="font-size:0.8em; opacity:0.7; margin-top:5px;">
+                <strong>Souris :</strong> Clic par clic (Lignes droites).<br>
+                <strong>Stylet :</strong> Dessin libre (Suit le doigt).
+            </p>
         </div>
         <div class="playbook-group">
             <label>Aide</label>
@@ -118,6 +137,7 @@
             <span class="creator-credit">Par Augier Flavien</span>
         </div>
     </div>
+
     <div class="main-content">
         <aside id="sidebar">
             <div id="properties-panel" class="section-container">
@@ -223,7 +243,7 @@
                         <button id="action-undo" title="Annuler (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M12.5,8C9.85,8 7.45,9 5.6,10.6L2,7V16H11L7.38,12.38C8.77,11.22 10.54,10.5 12.5,10.5C16.04,10.5 19.05,12.81 20.1,16L22.47,15.22C21.08,11.03 17.15,8 12.5,8Z"/></svg></button>
                         <button id="action-redo" title="Rétablir (Ctrl+Y)"><svg viewBox="0 0 24 24"><path d="M18.4,10.6C16.55,9 14.15,8 11.5,8C7.85,8 4.92,11.03 3.53,15.22L1,16C2.95,12.81 5.96,10.5 9.5,10.5C11.46,10.5 13.23,11.22 14.62,12.38L11,16H20V7L18.4,10.6Z"/></svg></button>
                         <button id="action-mirror" title="Inverser le schéma (Miroir)"><svg viewBox="0 0 24 24"><path d="M12,4L8,8H11V16H8L12,20L16,16H13V8H16L12,4M2,12H4V14H2V12M6,12H8V14H6V12M18,12H20V14H18V12M22,12H24V14H22V12Z"/></svg></button>
-                        <button id="tool-clear" class="danger" title="Effacer la scène"><svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2 2 0 0,0 8,21H16A2 2 0 0,0 18,19V7H6V19Z"/></svg></button>
+                        <button id="tool-clear" class="danger" title="Effacer la scène"><svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2 2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg></button>
                     </div>
                 </div>
             </div>
@@ -343,6 +363,56 @@
         </div>
     </div>
     
+    <div id="plan-editor-modal" class="hidden">
+        <div id="plan-editor-content">
+            <header id="plan-editor-header">
+                <h3 id="plan-editor-title">Créer un nouveau plan</h3>
+                <button id="plan-editor-close-btn" class="view-close-btn danger" title="Fermer">
+                    <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
+                </button>
+            </header>
+
+            <div id="plan-editor-body">
+                <main id="plan-editor-main">
+                    <input type="hidden" id="plan-editor-id" value="">
+                    
+                    <div class="plan-editor-group">
+                        <label for="plan-editor-name">Nom du Plan d'Entraînement</label>
+                        <input type="text" id="plan-editor-name" placeholder="Ex: Échauffement U15">
+                    </div>
+                    
+                    <div class="plan-editor-group">
+                        <label for="plan-editor-notes">Notes / Objectifs</label>
+                        <textarea id="plan-editor-notes" placeholder="Objectifs de la séance, points clés, etc."></textarea>
+                    </div>
+
+                    <div class="plan-editor-group">
+                        <label>Exercices Inclus</label>
+                        <ul id="plan-playbooks-list">
+                            <li class="plan-editor-empty-list">Ajoutez des exercices depuis la bibliothèque de droite.</li>
+                        </ul>
+                    </div>
+                </main>
+
+                <aside id="plan-editor-playbook-selector">
+                    <h4>Ajouter depuis la Bibliothèque</h4>
+                    
+                    <div id="plan-selector-filters" class="filter-bar">
+                        </div>
+                    
+                    <input type="text" id="plan-selector-search" placeholder="Rechercher un exercice...">
+                    <div id="plan-selector-list">
+                        </div>
+                </aside>
+            </div>
+
+            <footer id="plan-editor-footer">
+                <button id="plan-editor-cancel-btn" class="danger">Annuler</button>
+                <button id="plan-editor-save-btn">Sauvegarder le Plan</button>
+            </footer>
+        </div>
+    </div>
+    
     <div id="help-view" class="fullscreen-view hidden">
         <header class="view-header">
             <h2>Aide & Prise en main</h2>
@@ -441,56 +511,6 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
-    </div>
-    
-    <div id="plan-editor-modal" class="hidden">
-        <div id="plan-editor-content">
-            <header id="plan-editor-header">
-                <h3 id="plan-editor-title">Créer un nouveau plan</h3>
-                <button id="plan-editor-close-btn" class="view-close-btn danger" title="Fermer">
-                    <svg viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>
-                </button>
-            </header>
-
-            <div id="plan-editor-body">
-                <main id="plan-editor-main">
-                    <input type="hidden" id="plan-editor-id" value="">
-                    
-                    <div class="plan-editor-group">
-                        <label for="plan-editor-name">Nom du Plan d'Entraînement</label>
-                        <input type="text" id="plan-editor-name" placeholder="Ex: Échauffement U15">
-                    </div>
-                    
-                    <div class="plan-editor-group">
-                        <label for="plan-editor-notes">Notes / Objectifs</label>
-                        <textarea id="plan-editor-notes" placeholder="Objectifs de la séance, points clés, etc."></textarea>
-                    </div>
-
-                    <div class="plan-editor-group">
-                        <label>Exercices Inclus</label>
-                        <ul id="plan-playbooks-list">
-                            <li class="plan-editor-empty-list">Ajoutez des exercices depuis la bibliothèque de droite.</li>
-                        </ul>
-                    </div>
-                </main>
-
-                <aside id="plan-editor-playbook-selector">
-                    <h4>Ajouter depuis la Bibliothèque</h4>
-                    
-                    <div id="plan-selector-filters" class="filter-bar">
-                        </div>
-                    
-                    <input type="text" id="plan-selector-search" placeholder="Rechercher un exercice...">
-                    <div id="plan-selector-list">
-                        </div>
-                </aside>
-            </div>
-
-            <footer id="plan-editor-footer">
-                <button id="plan-editor-cancel-btn" class="danger">Annuler</button>
-                <button id="plan-editor-save-btn">Sauvegarder le Plan</button>
-            </footer>
         </div>
     </div>
     
