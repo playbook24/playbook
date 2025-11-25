@@ -1,6 +1,7 @@
 /**
  * ui.js
  * Gestion de l'interface utilisateur.
+ * Mise à jour : Inclut le CALENDRIER dans le backup.
  */
 
 window.ORB.ui = {
@@ -26,7 +27,6 @@ window.ORB.ui = {
             const mode = window.ORB.appState.inputMode;
             const isStylus = mode === 'stylus';
             
-            // Bascule des icônes
             iconMouse.classList.toggle('hidden', isStylus);
             iconStylus.classList.toggle('hidden', !isStylus);
             
@@ -34,7 +34,6 @@ window.ORB.ui = {
             btn.title = isStylus ? "Mode Stylet : Dessin libre" : "Mode Souris : Point à point";
         };
 
-        // Charger la préférence
         const savedMode = localStorage.getItem('inputMode');
         if (savedMode) {
             window.ORB.appState.inputMode = savedMode;
@@ -80,9 +79,13 @@ window.ORB.ui = {
             const activeFloatingPanel = document.querySelector('.floating-panel:not(.hidden)');
             if (activeFloatingPanel) {
                 const button = activeFloatingPanel.id.includes('play-manager') ? togglePlaybookManagerBtn : toggleSettingsBtn;
+                // Vérifie si le clic est en dehors du panneau et du bouton
                 if (!activeFloatingPanel.contains(e.target) && !button.contains(e.target)) {
-                    activeFloatingPanel.classList.add('hidden');
-                    button.classList.remove('active');
+                    // Exception : ne pas fermer si on clique sur une modale (comme le calendrier)
+                    if (!e.target.closest('.fullscreen-view') && !e.target.closest('.hidden')) {
+                         activeFloatingPanel.classList.add('hidden');
+                         button.classList.remove('active');
+                    }
                 }
             }
         });
@@ -124,18 +127,13 @@ window.ORB.ui = {
             window.ORB.commitState();
         });
         
+        // Gestion AIDE : Ferme les paramètres quand on l'ouvre
         document.getElementById('show-help-btn').addEventListener('click', () => {
-    // 1. Ouvrir l'aide
-    document.getElementById('help-view').classList.remove('hidden');
-    
-    // 2. Fermer le panneau des paramètres (si ouvert)
-    document.getElementById('settings-panel').classList.add('hidden');
-    document.getElementById('toggle-settings-btn').classList.remove('active');
-    
-    // 3. (Optionnel) Fermer aussi le manager s'il était ouvert (peu probable ici mais propre)
-    document.getElementById('play-manager-container').classList.add('hidden');
-    document.getElementById('toggle-playbook-manager-btn').classList.remove('active');
-});
+            document.getElementById('help-view').classList.remove('hidden');
+            document.getElementById('settings-panel').classList.add('hidden');
+            document.getElementById('toggle-settings-btn').classList.remove('active');
+        });
+        
         document.getElementById('help-close-btn').addEventListener('click', () => document.getElementById('help-view').classList.add('hidden'));
     },
 
@@ -393,7 +391,14 @@ window.ORB.ui = {
         const noPropsMessage = document.getElementById('no-props-message');
         
         const hasSelection = appState.selectedElement || appState.selectedScene;
-        propertiesPanel.classList.toggle('hidden', !hasSelection);
+        
+        // Sur mobile, on gère l'affichage via la classe hidden
+        if (!hasSelection) {
+            propertiesPanel.classList.add('hidden');
+        } else {
+            propertiesPanel.classList.remove('hidden');
+        }
+        
         noPropsMessage.style.display = hasSelection ? 'none' : 'block';
 
         if (appState.selectedElement) {
@@ -435,6 +440,16 @@ window.ORB.ui = {
     bindPropertiesPanel: function() {
         const panel = document.getElementById('properties-panel');
         
+        // Fermer le panneau si on clique sur la poignée (mobile)
+        panel.addEventListener('click', (e) => {
+            if (e.target === panel && window.innerWidth <= 1024) {
+                window.ORB.appState.selectedElement = null;
+                window.ORB.appState.selectedScene = null;
+                this.updatePropertiesPanel();
+                window.ORB.renderer.redrawCanvas();
+            }
+        });
+
         panel.addEventListener('change', e => {
             const appState = window.ORB.appState;
             if (appState.selectedElement) {
@@ -511,6 +526,7 @@ window.ORB.ui = {
         document.getElementById('action-redo').disabled = window.ORB.redoStack.length === 0;
     },
 
+    // --- FONCTION D'EXPORT MISE A JOUR POUR INCLURE LE CALENDRIER ---
     bindExports: function() {
         document.getElementById('save-file-btn').addEventListener('click', () => {
             const blob = new Blob([JSON.stringify(window.ORB.playbookState, null, 2)], { type: 'application/json' });
@@ -519,8 +535,10 @@ window.ORB.ui = {
             a.href = url; a.download = `${window.ORB.playbookState.name.trim() || 'playbook'}.json`;
             document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
         });
+        
         const fileInput = document.getElementById('import-file-input');
         document.getElementById('load-file-btn').addEventListener('click', () => fileInput.click());
+        
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -538,7 +556,7 @@ window.ORB.ui = {
                         document.getElementById('play-manager-container').classList.add('hidden');
                         alert("Playbook importé !");
                     } else if (data.version === "orb_backup_v1") {
-                        if (confirm("Importer ce backup remplacera TOUTES vos données. Continuer ?")) {
+                        if (confirm("Importer ce backup remplacera TOUTES vos données (y compris le calendrier). Continuer ?")) {
                             orbDB.importBackupData(data.data).then(() => {
                                 alert("Backup restauré. Rechargement...");
                                 window.location.reload();
@@ -550,6 +568,7 @@ window.ORB.ui = {
             reader.readAsText(file);
             e.target.value = '';
         });
+
         document.getElementById('save-to-library-btn').addEventListener('click', async () => {
             const btn = document.getElementById('save-to-library-btn');
             btn.disabled = true; btn.textContent = "Sauvegarde...";
@@ -567,11 +586,14 @@ window.ORB.ui = {
             } catch(e) { console.error(e); alert("Erreur sauvegarde."); }
             finally { btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17 3H7C5.9 3 5 3.9 5 5V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V5C19 3.9 18.1 3 17 3M17 19H7V5H17V19M12 9L10 11H13V15H11V13L9 15L11 17V15H15V11H13L15 9H12Z"/></svg> Sauvegarder'; }
         });
+
+        // --- EXPORT COMPLET (BACKUP) ---
         document.getElementById('export-all-data-btn').addEventListener('click', async () => {
             const button = document.getElementById('export-all-data-btn');
             const originalHtml = button.innerHTML;
             button.disabled = true;
             button.textContent = 'Préparation...';
+            
             const blobToDataURL = (blob) => {
                 return new Promise((resolve) => {
                     if (!blob || !(blob instanceof Blob)) { resolve(null); return; }
@@ -580,21 +602,32 @@ window.ORB.ui = {
                     reader.readAsDataURL(blob);
                 });
             };
+            
             try {
                 const playbooks = await orbDB.getAllPlaybooks();
                 const tags = await orbDB.getAllTags();
                 const plans = await orbDB.getAllPlans();
+                // NOUVEAU : Ajout des événements calendrier
+                const calendarEvents = await orbDB.getAllCalendarEvents();
+
                 const serializablePlaybooks = await Promise.all(
                     playbooks.map(async (pb) => {
                         const previewDataUrl = await blobToDataURL(pb.preview);
                         return { ...pb, preview: previewDataUrl };
                     })
                 );
+                
                 const allData = {
                     version: "orb_backup_v1",
                     createdAt: new Date().toISOString(),
-                    data: { playbooks: serializablePlaybooks, tags: tags, trainingPlans: plans }
+                    data: { 
+                        playbooks: serializablePlaybooks, 
+                        tags: tags, 
+                        trainingPlans: plans,
+                        calendarEvents: calendarEvents // Inclus dans le backup
+                    }
                 };
+                
                 const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -603,6 +636,7 @@ window.ORB.ui = {
             } catch (error) { console.error("Erreur Backup:", error); alert("Erreur lors du backup."); } 
             finally { button.disabled = false; button.innerHTML = originalHtml; }
         });
+
         document.getElementById('export-pdf-btn').addEventListener("click", async () => {
              if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') return alert("Erreur lib PDF.");
              const { jsPDF } = window.jspdf;

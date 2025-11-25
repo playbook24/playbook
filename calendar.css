@@ -1,0 +1,322 @@
+/**
+ * calendar.css
+ * Styles pour le calendrier, l'historique et la gestion d'événements.
+ */
+
+/* --- COMMANDES DU CALENDRIER --- */
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: var(--color-container-background);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+}
+
+.calendar-controls h3 {
+    margin: 0;
+    font-family: var(--font-title);
+    font-size: 1.5em;
+    color: var(--color-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+body.dark-mode .calendar-controls h3 {
+    color: var(--color-primary);
+}
+
+.calendar-controls button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2em;
+    padding: 0;
+    cursor: pointer;
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    transition: all 0.2s ease;
+}
+.calendar-controls button:hover {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+/* --- GRILLE DU CALENDRIER --- */
+#calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    padding-bottom: 80px; /* Espace pour le scroll mobile */
+}
+
+/* En-têtes (Lun, Mar, Mer...) */
+.calendar-header {
+    text-align: center;
+    font-weight: bold;
+    padding: 10px 0;
+    color: var(--color-text);
+    opacity: 0.7;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+/* Cases des jours */
+.calendar-day {
+    background-color: var(--color-container-background);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    min-height: 100px;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.calendar-day:hover:not(.empty) {
+    background-color: var(--color-background);
+    transform: translateY(-2px);
+}
+body.dark-mode .calendar-day:hover:not(.empty) {
+    background-color: #2a2a2a;
+}
+
+.calendar-day.empty {
+    background-color: transparent;
+    border: none;
+    cursor: default;
+}
+
+/* Numéro du jour */
+.day-number {
+    font-weight: bold;
+    margin-bottom: 5px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.9em;
+    align-self: flex-end; /* Numéro à droite */
+}
+
+.day-number.today {
+    background-color: var(--color-primary);
+    color: var(--color-button-text-on-gold);
+}
+
+/* Étiquettes d'événements */
+.calendar-event-chip {
+    font-size: 0.8em;
+    padding: 4px 6px;
+    border-radius: 4px;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+    margin-bottom: 2px;
+}
+
+.chip-icon {
+    flex-shrink: 0;
+    opacity: 0.9;
+}
+
+/* --- COULEURS PERSONNALISÉES --- */
+.color-options {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+.color-option {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.color-option.selected {
+    border-color: var(--color-text);
+    transform: scale(1.1);
+    border-width: 2px;
+}
+
+/* --- MODALE ÉDITEUR D'ÉVÉNEMENT --- */
+#event-editor-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#event-modal-content {
+    background-color: var(--color-container-background);
+    width: 100%;
+    max-width: 500px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lifted);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+}
+
+#event-modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-background);
+}
+#event-modal-header h3 { margin: 0; font-family: var(--font-title); color: var(--color-secondary); font-size: 1.3em; }
+body.dark-mode #event-modal-header h3 { color: var(--color-primary); }
+
+#event-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#event-notes {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--color-input-border);
+    background-color: var(--color-input-background);
+    color: var(--color-text);
+    box-sizing: border-box;
+    resize: vertical;
+    font-family: var(--font-body);
+}
+
+#event-modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    background-color: var(--color-background);
+}
+#event-modal-footer button { flex: 1; }
+
+/* --- MODALE SÉLECTEUR DE PLAN (SNAPSHOT) --- */
+#plan-picker-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    z-index: 2100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#plan-picker-content {
+    background-color: var(--color-container-background);
+    width: 100%;
+    max-width: 400px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lifted);
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+}
+
+.plan-picker-item {
+    transition: background-color 0.2s ease;
+}
+.plan-picker-item:hover {
+    background-color: var(--color-background);
+}
+body.dark-mode .plan-picker-item:hover {
+    background-color: #2a2a2a;
+}
+
+/* --- MODALE LECTEUR (VIEWER) --- */
+#snapshot-viewer-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 2200; /* Au-dessus de tout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 800px) {
+    #calendar-grid {
+        gap: 5px;
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+        padding: 2px;
+        font-size: 0.9em;
+    }
+    
+    .calendar-event-chip {
+        font-size: 0.65em;
+        padding: 2px 4px;
+        margin-bottom: 2px;
+    }
+    
+    .calendar-controls h3 {
+        font-size: 1.2em;
+    }
+
+    /* Modales plein écran sur mobile */
+    #event-editor-modal, #plan-picker-modal, #snapshot-viewer-modal {
+        padding: 0;
+        align-items: flex-end;
+    }
+    
+    #event-modal-content, #plan-picker-content, #snapshot-viewer-content {
+        max-width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        border: none;
+    }
+    
+    /* Pour le viewer sur mobile */
+    #snapshot-viewer-content {
+        max-width: 100% !important;
+        height: 100% !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+    }
+    
+    #event-modal-footer {
+        padding-bottom: 30px;
+    }
+}
