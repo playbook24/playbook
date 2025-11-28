@@ -1,7 +1,7 @@
 /**
  * ui.js
  * Gestion de l'interface utilisateur.
- * Mise à jour : Backup incluant JOUEURS et EQUIPES.
+ * VERSION FINALE : Backup incluant Playbooks, Plans, Calendrier, Joueurs et Équipes.
  */
 
 window.ORB.ui = {
@@ -601,7 +601,8 @@ window.ORB.ui = {
                 const playbooks = await orbDB.getAllPlaybooks();
                 const tags = await orbDB.getAllTags();
                 const plans = await orbDB.getAllPlans();
-                // NOUVEAU : Ajout des stores dans le backup
+                
+                // AJOUT DES NOUVEAUX STORES
                 const calendarEvents = await orbDB.getAllCalendarEvents();
                 const players = await orbDB.getAllPlayers();
                 const teams = await orbDB.getAllTeams();
@@ -620,9 +621,9 @@ window.ORB.ui = {
                         playbooks: serializablePlaybooks, 
                         tags, 
                         trainingPlans: plans,
-                        calendarEvents, // Inclus
-                        players,        // Inclus
-                        teams           // Inclus
+                        calendarEvents, 
+                        players, 
+                        teams 
                     }
                 };
                 
