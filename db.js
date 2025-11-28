@@ -1,11 +1,15 @@
 /**
  * db.js
- * VERSION AVEC CALENDRIER (v5.0)
+ * VERSION MULTI-EQUIPES (v5.2) - COMPLET
  * Base de données : ORB_Playbook_Reset_v4
  *
- * MODIFICATIONS :
- * - Version IndexedDB passée à 3.
- * - Ajout du store 'calendarEvents' pour stocker les entraînements et les snapshots de plans.
+ * Ce fichier gère TOUTES les données de l'application :
+ * - Playbooks (Dessins)
+ * - Tags (Catégories)
+ * - Plans d'entraînement
+ * - Calendrier (Événements)
+ * - Joueurs (Effectif)
+ * - Équipes (Nouveau)
  */
 
 class ORBDatabase {
@@ -22,8 +26,8 @@ class ORBDatabase {
                 return;
             }
 
-            // --- PASSAGE EN VERSION 3 pour ajouter le calendrier ---
-            const request = indexedDB.open(this.dbName, 3); 
+            // --- VERSION 5 : Ajout des Équipes ---
+            const request = indexedDB.open(this.dbName, 5); 
 
             request.onerror = (event) => {
                 console.error("Erreur IndexedDB:", event.target.error);
@@ -32,7 +36,7 @@ class ORBDatabase {
 
             request.onsuccess = (event) => {
                 this.db = event.target.result;
-                console.log("Base de données (v5.0 - Calendrier) ouverte.");
+                console.log("Base de données (v5.2 - Complet) ouverte.");
                 resolve(this.db);
             };
 
@@ -40,45 +44,58 @@ class ORBDatabase {
                 const db = event.target.result;
                 const transaction = event.target.transaction;
 
-                // 1. Store 'playbooks'
-                let playbookStore;
+                // 1. Store 'playbooks' (Dessins)
                 if (!db.objectStoreNames.contains('playbooks')) {
-                    playbookStore = db.createObjectStore('playbooks', { keyPath: 'id', autoIncrement: true });
-                    playbookStore.createIndex('name', 'name', { unique: false });
-                    playbookStore.createIndex('createdAt', 'createdAt', { unique: false });
+                    const store = db.createObjectStore('playbooks', { keyPath: 'id', autoIncrement: true });
+                    store.createIndex('name', 'name', { unique: false });
+                    store.createIndex('createdAt', 'createdAt', { unique: false });
+                    store.createIndex('tagIds', 'tagIds', { unique: false, multiEntry: true });
                 } else {
-                    playbookStore = transaction.objectStore('playbooks');
-                }
-                
-                if (!playbookStore.indexNames.contains('tagIds')) {
-                    playbookStore.createIndex('tagIds', 'tagIds', { unique: false, multiEntry: true });
+                    // Mise à jour si l'index tagIds manque (pour les anciennes versions)
+                    const store = transaction.objectStore('playbooks');
+                    if (!store.indexNames.contains('tagIds')) {
+                        store.createIndex('tagIds', 'tagIds', { unique: false, multiEntry: true });
+                    }
                 }
 
-                // 2. Store 'trainingPlans'
+                // 2. Store 'trainingPlans' (Plans)
                 if (!db.objectStoreNames.contains('trainingPlans')) {
                     const store = db.createObjectStore('trainingPlans', { keyPath: 'id', autoIncrement: true });
                     store.createIndex('name', 'name', { unique: false });
                     store.createIndex('createdAt', 'createdAt', { unique: false });
                 }
 
-                // 3. Store 'tags'
+                // 3. Store 'tags' (Catégories)
                 if (!db.objectStoreNames.contains('tags')) {
-                    const tagsStore = db.createObjectStore('tags', { keyPath: 'id', autoIncrement: true });
-                    tagsStore.createIndex('name', 'name', { unique: true });
+                    const store = db.createObjectStore('tags', { keyPath: 'id', autoIncrement: true });
+                    store.createIndex('name', 'name', { unique: true });
                 }
 
-                // 4. NOUVEAU STORE : 'calendarEvents'
+                // 4. Store 'calendarEvents' (Calendrier)
                 if (!db.objectStoreNames.contains('calendarEvents')) {
-                    const eventStore = db.createObjectStore('calendarEvents', { keyPath: 'id', autoIncrement: true });
-                    // On indexe par date pour retrouver facilement les entraînements d'un mois
-                    eventStore.createIndex('date', 'date', { unique: false });
-                    console.log("Store 'calendarEvents' créé.");
+                    const store = db.createObjectStore('calendarEvents', { keyPath: 'id', autoIncrement: true });
+                    store.createIndex('date', 'date', { unique: false });
+                }
+                
+                // 5. Store 'players' (Joueurs)
+                if (!db.objectStoreNames.contains('players')) {
+                    const store = db.createObjectStore('players', { keyPath: 'id', autoIncrement: true });
+                    store.createIndex('lastName', 'lastName', { unique: false });
+                }
+
+                // 6. Store 'teams' (Équipes) - NOUVEAU
+                if (!db.objectStoreNames.contains('teams')) {
+                    const store = db.createObjectStore('teams', { keyPath: 'id', autoIncrement: true });
+                    console.log("Store 'teams' créé.");
                 }
             };
         });
     }
 
-    // --- Fonctions Playbooks ---
+    // ==========================================
+    // GESTION DES PLAYBOOKS (SCHÉMAS)
+    // ==========================================
+
     async savePlaybook(playbookData, previewBlob, id = null) {
         if (!this.db) await this.open();
         return new Promise((resolve, reject) => {
@@ -87,11 +104,15 @@ class ORBDatabase {
             let record;
 
             if (id) {
+                // Mise à jour
                 const getRequest = store.get(id);
                 getRequest.onerror = (e) => reject(e.target.error);
                 getRequest.onsuccess = (e) => {
                     const existing = e.target.result;
-                    if (!existing) { reject(new Error(`Playbook ${id} introuvable.`)); return; }
+                    if (!existing) { 
+                        reject(new Error(`Playbook ${id} introuvable.`)); 
+                        return; 
+                    }
                     record = {
                         ...existing,
                         name: playbookData.name || 'Playbook sans nom',
@@ -104,6 +125,7 @@ class ORBDatabase {
                     putRequest.onerror = (e) => reject(e.target.error);
                 };
             } else {
+                // Création
                 record = {
                     name: playbookData.name || 'Playbook sans nom',
                     playbookData: playbookData,
@@ -126,6 +148,7 @@ class ORBDatabase {
             tx.onerror = (e) => reject(e.target.error);
         });
     }
+
     async getPlaybook(id) {
         if (!this.db) await this.open();
         return new Promise((resolve, reject) => {
@@ -134,6 +157,7 @@ class ORBDatabase {
             tx.onerror = (e) => reject(e.target.error);
         });
     }
+
     async deletePlaybook(id) {
         if (!this.db) await this.open();
         return new Promise((resolve, reject) => {
@@ -143,38 +167,14 @@ class ORBDatabase {
         });
     }
 
-    // --- Fonctions Tags ---
-    async getAllTags() {
-        if (!this.db) await this.open();
-        return new Promise((resolve, reject) => {
-            const tx = this.db.transaction(['tags'], 'readonly');
-            tx.objectStore('tags').getAll().onsuccess = (e) => resolve(e.target.result);
-            tx.onerror = (e) => reject(e.target.error);
-        });
-    }
-    async addTag(name) {
-        if (!this.db) await this.open();
-        return new Promise((resolve, reject) => {
-            const tx = this.db.transaction(['tags'], 'readwrite');
-            const req = tx.objectStore('tags').add({ name: name });
-            req.onsuccess = (e) => resolve(e.target.result);
-            req.onerror = (e) => reject(e.target.error); 
-        });
-    }
-    async deleteTag(id) {
-        if (!this.db) await this.open();
-        return new Promise((resolve, reject) => {
-            const tx = this.db.transaction(['tags'], 'readwrite');
-            const req = tx.objectStore('tags').delete(id);
-            req.onsuccess = () => resolve(true);
-            req.onerror = (e) => reject(e.target.error);
-        });
-    }
     async assignTagsToPlaybook(playbookId, tagIdsArray) {
         if (!this.db) await this.open();
+        // Récupère d'abord le playbook pour ne pas écraser les autres données
         const playbook = await this.getPlaybook(playbookId);
         if (!playbook) throw new Error("Playbook non trouvé.");
+        
         playbook.tagIds = tagIdsArray;
+
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['playbooks'], 'readwrite');
             const store = transaction.objectStore('playbooks');
@@ -184,7 +184,43 @@ class ORBDatabase {
         });
     }
 
-    // --- Fonctions Plans ---
+    // ==========================================
+    // GESTION DES TAGS
+    // ==========================================
+
+    async getAllTags() {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['tags'], 'readonly');
+            tx.objectStore('tags').getAll().onsuccess = (e) => resolve(e.target.result);
+            tx.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    async addTag(name) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['tags'], 'readwrite');
+            const req = tx.objectStore('tags').add({ name: name });
+            req.onsuccess = (e) => resolve(e.target.result);
+            req.onerror = (e) => reject(e.target.error); 
+        });
+    }
+
+    async deleteTag(id) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['tags'], 'readwrite');
+            const req = tx.objectStore('tags').delete(id);
+            req.onsuccess = () => resolve(true);
+            req.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    // ==========================================
+    // GESTION DES PLANS D'ENTRAÎNEMENT
+    // ==========================================
+
     async savePlan(planData, id = null) {
         if (!this.db) await this.open();
         return new Promise((resolve, reject) => {
@@ -197,11 +233,13 @@ class ORBDatabase {
                 createdAt: planData.createdAt || new Date()
             };
             if (id) record.id = id;
+            
             const req = id ? store.put(record) : store.add(record);
             req.onsuccess = (e) => resolve(e.target.result);
             req.onerror = (e) => reject(e.target.error);
         });
     }
+
     async getAllPlans() {
         if (!this.db) await this.open();
         return new Promise((resolve, reject) => {
@@ -210,6 +248,7 @@ class ORBDatabase {
             tx.onerror = (e) => reject(e.target.error);
         });
     }
+
     async getPlan(id) {
         if (!this.db) await this.open();
         return new Promise((resolve, reject) => {
@@ -218,6 +257,7 @@ class ORBDatabase {
             tx.onerror = (e) => reject(e.target.error);
         });
     }
+
     async deletePlan(id) {
         if (!this.db) await this.open();
         return new Promise((resolve, reject) => {
@@ -227,24 +267,22 @@ class ORBDatabase {
         });
     }
 
-    // --- NOUVEAU : Fonctions CALENDRIER ---
+    // ==========================================
+    // GESTION DU CALENDRIER (EVÉNEMENTS)
+    // ==========================================
 
-    // Sauvegarde un événement avec une date et (optionnel) un Snapshot du plan
     async saveCalendarEvent(eventData) {
         if (!this.db) await this.open();
         return new Promise((resolve, reject) => {
             const tx = this.db.transaction(['calendarEvents'], 'readwrite');
             const store = tx.objectStore('calendarEvents');
-            
-            // eventData contiendra : { id (si edit), dateString, title, planSnapshot: {...} }
+            // eventData contient : id, date, title, notes, color, planSnapshot, attendance, teamId...
             const req = eventData.id ? store.put(eventData) : store.add(eventData);
-            
             req.onsuccess = (e) => resolve(e.target.result);
             req.onerror = (e) => reject(e.target.error);
         });
     }
 
-    // Récupère tous les événements (on filtrera par mois en JS pour simplifier)
     async getAllCalendarEvents() {
         if (!this.db) await this.open();
         return new Promise((resolve, reject) => {
@@ -263,10 +301,82 @@ class ORBDatabase {
         });
     }
 
-    // --- Import / Backup ---
+    // ==========================================
+    // GESTION DES ÉQUIPES (NOUVEAU)
+    // ==========================================
+
+    async saveTeam(teamData) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['teams'], 'readwrite');
+            const store = tx.objectStore('teams');
+            // teamData : { id, name }
+            const req = teamData.id ? store.put(teamData) : store.add(teamData);
+            req.onsuccess = (e) => resolve(e.target.result);
+            req.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    async getAllTeams() {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['teams'], 'readonly');
+            tx.objectStore('teams').getAll().onsuccess = (e) => resolve(e.target.result);
+            tx.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    async deleteTeam(id) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['teams'], 'readwrite');
+            tx.objectStore('teams').delete(id).onsuccess = () => resolve(true);
+            tx.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    // ==========================================
+    // GESTION DES JOUEURS (EFFECTIF)
+    // ==========================================
+
+    async savePlayer(playerData) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['players'], 'readwrite');
+            const store = tx.objectStore('players');
+            // playerData : { id, lastName, firstName, license, teamId, createdAt }
+            const req = playerData.id ? store.put(playerData) : store.add(playerData);
+            req.onsuccess = (e) => resolve(e.target.result);
+            req.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    async getAllPlayers() {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['players'], 'readonly');
+            tx.objectStore('players').getAll().onsuccess = (e) => resolve(e.target.result);
+            tx.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    async deletePlayer(id) {
+        if (!this.db) await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(['players'], 'readwrite');
+            tx.objectStore('players').delete(id).onsuccess = () => resolve(true);
+            tx.onerror = (e) => reject(e.target.error);
+        });
+    }
+
+    // ==========================================
+    // SAUVEGARDE ET IMPORTATION (BACKUP GLOBAL)
+    // ==========================================
+
     async importBackupData(data) {
         if (!this.db) await this.open();
 
+        // Fonction utilitaire pour convertir DataURL en Blob
         const dataURLToBlob = (dataURL) => {
             if (!dataURL || typeof dataURL !== 'string' || !dataURL.startsWith('data:')) return null; 
             try {
@@ -284,13 +394,15 @@ class ORBDatabase {
         };
 
         return new Promise((resolve, reject) => {
-            // Ajout de 'calendarEvents' à la liste des stores à nettoyer/importer
-            const storeNames = ['playbooks', 'tags', 'trainingPlans', 'calendarEvents'];
+            // Liste de tous les stores gérés
+            const storeNames = ['playbooks', 'tags', 'trainingPlans', 'calendarEvents', 'players', 'teams'];
             
-            // On vérifie que les stores existent (pour éviter erreur si on importe un vieux backup sur une vieille BDD)
+            // On vérifie ceux qui existent vraiment dans la BDD actuelle (pour la compatibilité)
             const availableStores = [];
             for(let name of storeNames) {
-                if (this.db.objectStoreNames.contains(name)) availableStores.push(name);
+                if (this.db.objectStoreNames.contains(name)) {
+                    availableStores.push(name);
+                }
             }
 
             const transaction = this.db.transaction(availableStores, 'readwrite');
@@ -299,28 +411,34 @@ class ORBDatabase {
             transaction.oncomplete = () => resolve(true);
 
             try {
-                // Vidage
-                if(availableStores.includes('playbooks')) transaction.objectStore('playbooks').clear();
-                if(availableStores.includes('tags')) transaction.objectStore('tags').clear();
-                if(availableStores.includes('trainingPlans')) transaction.objectStore('trainingPlans').clear();
-                if(availableStores.includes('calendarEvents')) transaction.objectStore('calendarEvents').clear();
+                // 1. VIDAGE DES TABLES EXISTANTES
+                availableStores.forEach(store => {
+                    transaction.objectStore(store).clear();
+                });
 
-                // Remplissage
+                // 2. REMPLISSAGE AVEC LES DONNÉES DU BACKUP
                 if (data.tags && availableStores.includes('tags')) {
-                    data.tags.forEach(tag => transaction.objectStore('tags').add(tag));
+                    data.tags.forEach(x => transaction.objectStore('tags').add(x));
                 }
+                if (data.trainingPlans && availableStores.includes('trainingPlans')) {
+                    data.trainingPlans.forEach(x => transaction.objectStore('trainingPlans').add(x));
+                }
+                if (data.calendarEvents && availableStores.includes('calendarEvents')) {
+                    data.calendarEvents.forEach(x => transaction.objectStore('calendarEvents').add(x));
+                }
+                if (data.players && availableStores.includes('players')) {
+                    data.players.forEach(x => transaction.objectStore('players').add(x));
+                }
+                if (data.teams && availableStores.includes('teams')) {
+                    data.teams.forEach(x => transaction.objectStore('teams').add(x));
+                }
+                
+                // Gestion spéciale pour les playbooks (Blobs)
                 if (data.playbooks && availableStores.includes('playbooks')) {
                     data.playbooks.forEach(pb => {
                         pb.preview = dataURLToBlob(pb.preview); 
                         transaction.objectStore('playbooks').add(pb);
                     });
-                }
-                if (data.trainingPlans && availableStores.includes('trainingPlans')) {
-                    data.trainingPlans.forEach(plan => transaction.objectStore('trainingPlans').add(plan));
-                }
-                // Import Calendrier
-                if (data.calendarEvents && availableStores.includes('calendarEvents')) {
-                    data.calendarEvents.forEach(evt => transaction.objectStore('calendarEvents').add(evt));
                 }
 
             } catch (error) {
@@ -331,4 +449,5 @@ class ORBDatabase {
     }
 }
 
+// Instance unique globale
 const orbDB = new ORBDatabase();

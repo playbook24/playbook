@@ -1,0 +1,170 @@
+/**
+ * roster.css
+ * Styles pour la gestion de l'effectif et les présences.
+ */
+
+/* --- GRILLE DES JOUEURS --- */
+.roster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    padding-bottom: 80px; /* Espace pour le scroll sur mobile */
+}
+
+/* --- CARTE JOUEUR --- */
+.roster-card {
+    background-color: var(--color-container-background);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.roster-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lifted);
+}
+
+.player-info {
+    flex-grow: 1;
+    margin-right: 15px;
+    overflow: hidden;
+}
+
+.player-name {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+body.dark-mode .player-name {
+    color: var(--color-text-on-dark);
+}
+
+.player-license {
+    font-size: 0.85em;
+    color: var(--color-text);
+    opacity: 0.6;
+    margin-top: 2px;
+}
+body.dark-mode .player-license {
+    color: var(--color-text-on-dark);
+}
+
+/* --- STATISTIQUES (BARRE DE PRÉSENCE) --- */
+.player-stats {
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.stat-bar-container {
+    width: 100%;
+    height: 6px;
+    background-color: var(--color-border);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease-out;
+}
+
+.stat-text {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: var(--color-text);
+    opacity: 0.8;
+}
+body.dark-mode .stat-text {
+    color: var(--color-text-on-dark);
+}
+
+/* Bouton Supprimer Joueur */
+.btn-delete-player {
+    min-width: 35px;
+    width: 35px;
+    height: 35px;
+    padding: 6px;
+    margin-left: 10px;
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--color-text);
+}
+.btn-delete-player:hover {
+    background-color: rgba(244, 67, 54, 0.1);
+    border-color: #d32f2f;
+    color: #d32f2f;
+}
+body.dark-mode .btn-delete-player {
+    border-color: #444;
+    color: var(--color-text);
+}
+
+
+/* --- MODALE APPEL (Attendance) --- */
+/* Note : La structure principale est gérée par le JS (inline styles), 
+   ici on affine l'apparence des éléments internes */
+
+#attendance-list div {
+    transition: background-color 0.2s ease;
+    border-radius: 6px;
+}
+
+#attendance-list div:hover {
+    background-color: var(--color-background);
+}
+body.dark-mode #attendance-list div:hover {
+    background-color: #2a2a2a;
+}
+
+#attendance-list span {
+    font-size: 1em;
+    font-weight: 500;
+    color: var(--color-text);
+}
+body.dark-mode #attendance-list span {
+    color: var(--color-text-on-dark);
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 800px) {
+    .roster-grid {
+        grid-template-columns: 1fr; /* Une seule colonne sur mobile */
+        gap: 10px;
+    }
+
+    .roster-card {
+        padding: 12px;
+    }
+    
+    /* Ajustement du formulaire d'ajout sur mobile */
+    /* Cible les inputs dans la section "Ajouter un Joueur" */
+    #roster-view .section-container div[style*="display:flex"] {
+        flex-direction: column;
+    }
+    
+    #roster-view input, 
+    #roster-view button {
+        width: 100%;
+        margin-bottom: 5px;
+        box-sizing: border-box; /* Important pour ne pas dépasser */
+    }
+    
+    /* Le sélecteur d'équipe en haut */
+    #roster-team-select {
+        margin-bottom: 10px;
+    }
+}
