@@ -1,7 +1,7 @@
 /**
  * ui.js
  * Gestion de l'interface utilisateur.
- * Mise à jour : Inclut le CALENDRIER dans le backup.
+ * Mise à jour : Backup incluant JOUEURS et EQUIPES.
  */
 
 window.ORB.ui = {
@@ -79,9 +79,7 @@ window.ORB.ui = {
             const activeFloatingPanel = document.querySelector('.floating-panel:not(.hidden)');
             if (activeFloatingPanel) {
                 const button = activeFloatingPanel.id.includes('play-manager') ? togglePlaybookManagerBtn : toggleSettingsBtn;
-                // Vérifie si le clic est en dehors du panneau et du bouton
                 if (!activeFloatingPanel.contains(e.target) && !button.contains(e.target)) {
-                    // Exception : ne pas fermer si on clique sur une modale (comme le calendrier)
                     if (!e.target.closest('.fullscreen-view') && !e.target.closest('.hidden')) {
                          activeFloatingPanel.classList.add('hidden');
                          button.classList.remove('active');
@@ -127,7 +125,6 @@ window.ORB.ui = {
             window.ORB.commitState();
         });
         
-        // Gestion AIDE : Ferme les paramètres quand on l'ouvre
         document.getElementById('show-help-btn').addEventListener('click', () => {
             document.getElementById('help-view').classList.remove('hidden');
             document.getElementById('settings-panel').classList.add('hidden');
@@ -392,7 +389,6 @@ window.ORB.ui = {
         
         const hasSelection = appState.selectedElement || appState.selectedScene;
         
-        // Sur mobile, on gère l'affichage via la classe hidden
         if (!hasSelection) {
             propertiesPanel.classList.add('hidden');
         } else {
@@ -440,7 +436,6 @@ window.ORB.ui = {
     bindPropertiesPanel: function() {
         const panel = document.getElementById('properties-panel');
         
-        // Fermer le panneau si on clique sur la poignée (mobile)
         panel.addEventListener('click', (e) => {
             if (e.target === panel && window.innerWidth <= 1024) {
                 window.ORB.appState.selectedElement = null;
@@ -526,7 +521,6 @@ window.ORB.ui = {
         document.getElementById('action-redo').disabled = window.ORB.redoStack.length === 0;
     },
 
-    // --- FONCTION D'EXPORT MISE A JOUR POUR INCLURE LE CALENDRIER ---
     bindExports: function() {
         document.getElementById('save-file-btn').addEventListener('click', () => {
             const blob = new Blob([JSON.stringify(window.ORB.playbookState, null, 2)], { type: 'application/json' });
@@ -556,7 +550,7 @@ window.ORB.ui = {
                         document.getElementById('play-manager-container').classList.add('hidden');
                         alert("Playbook importé !");
                     } else if (data.version === "orb_backup_v1") {
-                        if (confirm("Importer ce backup remplacera TOUTES vos données (y compris le calendrier). Continuer ?")) {
+                        if (confirm("Importer ce backup remplacera TOUTES vos données. Continuer ?")) {
                             orbDB.importBackupData(data.data).then(() => {
                                 alert("Backup restauré. Rechargement...");
                                 window.location.reload();
@@ -607,8 +601,10 @@ window.ORB.ui = {
                 const playbooks = await orbDB.getAllPlaybooks();
                 const tags = await orbDB.getAllTags();
                 const plans = await orbDB.getAllPlans();
-                // NOUVEAU : Ajout des événements calendrier
+                // NOUVEAU : Ajout des stores dans le backup
                 const calendarEvents = await orbDB.getAllCalendarEvents();
+                const players = await orbDB.getAllPlayers();
+                const teams = await orbDB.getAllTeams();
 
                 const serializablePlaybooks = await Promise.all(
                     playbooks.map(async (pb) => {
@@ -622,9 +618,11 @@ window.ORB.ui = {
                     createdAt: new Date().toISOString(),
                     data: { 
                         playbooks: serializablePlaybooks, 
-                        tags: tags, 
+                        tags, 
                         trainingPlans: plans,
-                        calendarEvents: calendarEvents // Inclus dans le backup
+                        calendarEvents, // Inclus
+                        players,        // Inclus
+                        teams           // Inclus
                     }
                 };
                 
