@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORB Board - Planificateur</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="planner.css">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="app-header">
+        <div style="display: flex; align-items: center; max-width: 1200px; margin: 0 auto;">
+            <a href="../../index.html" style="color: white; text-decoration: none; margin-right: 20px;">← Retour</a>
+            <h1 style="flex-grow: 1;">PLANIFICATEUR <span>D'ENTRAÎNEMENT</span></h1>
+        </div>
+    </header>
+
+    <main class="view-content" style="padding: 20px;">
+        <div id="planner-grid">
+            </div>
+    </main>
+
+    <div id="plan-editor-modal" class="modal hidden">
+        <div class="modal-content large">
+            <header class="modal-header">
+                <h3 id="plan-editor-title">Nouveau Plan</h3>
+                <button class="close-btn" id="plan-editor-close">×</button>
+            </header>
+            
+            <div class="plan-editor-body">
+                <div class="plan-main-info">
+                    <div class="form-group">
+                        <label>Nom du Plan</label>
+                        <input type="text" id="plan-name" placeholder="Ex: Fondamentaux Tir">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes / Objectifs</label>
+                        <textarea id="plan-notes" placeholder="Points clés de la séance..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Exercices sélectionnés</label>
+                        <ul id="plan-playbooks-list" class="sortable-list">
+                            </ul>
+                    </div>
+                </div>
+
+                <div class="plan-selector-aside">
+                    <h4>Ajouter un exercice</h4>
+                    <input type="text" id="selector-search" placeholder="Rechercher...">
+                    <div id="selector-list" class="mini-grid"></div>
+                </div>
+            </div>
+
+            <footer class="modal-footer">
+                <button id="plan-cancel" class="danger">Annuler</button>
+                <button id="plan-save" class="btn-primary">Enregistrer le Plan</button>
+            </footer>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="../../core/db.js"></script>
+    <script src="planner.js"></script>
+</body>
+</html>

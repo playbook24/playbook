@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORB Board - Effectif</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="roster.css">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="app-header">
+        <div style="display: flex; align-items: center; max-width: 1200px; margin: 0 auto;">
+            <a href="../../index.html" style="color: white; text-decoration: none; margin-right: 20px;">← Retour</a>
+            <h1 style="flex-grow: 1;">GESTION DE <span>L'EFFECTIF</span></h1>
+        </div>
+    </header>
+
+    <main class="view-content" style="max-width:800px; margin:20px auto; padding: 0 20px;">
+        <div class="section-container" style="margin-bottom:15px; border-left:4px solid var(--color-primary);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3 style="margin:0;">Équipe active</h3>
+                <button id="btn-create-team" class="btn-primary" style="padding:4px 8px; font-size:0.8em; cursor:pointer;">Nouvelle équipe</button>
+            </div>
+            <select id="roster-team-select" style="width:100%; padding:10px; font-size:1.1em; border-radius:6px; border:1px solid var(--color-border);"></select>
+        </div>
+
+        <div class="section-container" style="margin-bottom:20px;">
+            <h3 style="margin-top:0;">Ajouter un Joueur</h3>
+            <div class="add-player-form" style="display:flex; gap:10px; flex-wrap:wrap;">
+                <input type="text" id="roster-lastname" placeholder="Nom" style="flex:1; padding:8px; border-radius:5px; border:1px solid var(--color-border);">
+                <input type="text" id="roster-firstname" placeholder="Prénom" style="flex:1; padding:8px; border-radius:5px; border:1px solid var(--color-border);">
+                <input type="text" id="roster-license" placeholder="N° Licence" style="flex:1; padding:8px; border-radius:5px; border:1px solid var(--color-border);">
+                <button id="btn-add-player" class="btn-primary" style="padding: 8px 15px; cursor:pointer;">Ajouter</button>
+            </div>
+        </div>
+        
+        <div id="roster-list" class="roster-grid"></div>
+    </main>
+
+    <script src="../../core/db.js"></script>
+    <script src="roster.js"></script>
+</body>
+</html>

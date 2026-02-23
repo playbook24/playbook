@@ -1,0 +1,90 @@
+/**
+ * modules/planner/planner.css
+ */
+#planner-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.plan-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-soft);
+}
+
+.card-new-plan {
+    border: 3px dashed var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--color-text);
+    border-radius: 12px;
+}
+
+/* Modale Large */
+.modal-content.large {
+    max-width: 1000px;
+    width: 95%;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.plan-editor-body {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    flex-grow: 1;
+    overflow: hidden;
+    padding: 10px 0;
+}
+
+.plan-main-info, .plan-selector-aside {
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.plan-selector-aside {
+    border-left: 1px solid var(--color-border);
+    padding-left: 20px;
+}
+
+.mini-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.selector-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.selector-item img {
+    width: 60px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 3px;
+}
+
+.plan-playbook-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #f9f9f9;
+    margin-bottom: 5px;
+    border-radius: 5px;
+}

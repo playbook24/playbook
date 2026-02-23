@@ -1,0 +1,164 @@
+/**
+ * modules/board/board.css
+ * Restaure l'affichage exact de l'ancien éditeur
+ */
+.main-content {
+    display: flex;
+    flex-direction: row;
+    height: calc(100vh - 70px); /* Prend toute la hauteur sous le header */
+    overflow: hidden;
+    background-color: var(--color-background);
+}
+
+#sidebar {
+    width: 320px;
+    background-color: var(--color-container);
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 15px;
+    z-index: 10;
+}
+
+.main-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Le conteneur du terrain */
+#court-container {
+    flex-grow: 1;
+    position: relative;
+    background-color: var(--color-background);
+    border-radius: 8px;
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#court-background-container, #basketball-court {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 1200px;
+    aspect-ratio: 280 / 150;
+}
+
+#basketball-court {
+    z-index: 2;
+    cursor: crosshair;
+}
+
+#court-background-container {
+    z-index: 1;
+}
+
+.court {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Barre d'outils */
+#toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: var(--color-container);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 15px;
+}
+
+.tool-group {
+    display: flex;
+    gap: 5px;
+    border-right: 1px solid var(--color-border);
+    padding-right: 10px;
+}
+.tool-group:last-child { border-right: none; }
+
+.tool-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background-color: var(--color-container);
+    color: var(--color-text);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.tool-btn svg { width: 24px; height: 24px; fill: currentColor; }
+.tool-btn:hover { background-color: #e0e0e0; }
+.tool-btn.active { background-color: var(--color-secondary); color: var(--color-primary); }
+
+/* --- PANNEAUX FLOTTANTS (Manager & Paramètres) --- */
+.floating-panel {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    width: 350px;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    padding: 20px;
+    z-index: 1000;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+.floating-panel.hidden {
+    display: none !important;
+}
+
+/* --- LECTEUR D'ANIMATION --- */
+#animation-player {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.9);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#animation-player.hidden { 
+    display: none !important; 
+}
+#animation-container {
+    position: relative;
+    width: 90%; 
+    max-width: 1000px;
+    background: #BFA98D;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border-radius: 8px;
+    overflow: hidden;
+}
+#animation-court-background, #animation-canvas {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+}
+#animation-controls {
+    margin-top: 20px; display: flex; align-items: center; gap: 20px; color: white;
+}
+#animation-controls button {
+    background: #212121; color: white; border: 1px solid #555; border-radius: 50%;
+    width: 50px; height: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s;
+}
+#animation-controls button:hover { transform: scale(1.1); }
+#animation-controls button svg { width: 30px; height: 30px; fill: currentColor; }
+#anim-time-display { font-size: 1.2em; font-family: monospace; }

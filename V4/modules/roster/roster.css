@@ -1,0 +1,51 @@
+/**
+ * modules/roster/roster.css - V4 Corrigée
+ */
+.view-content {
+    background: var(--color-container);
+    border-radius: 12px;
+    box-shadow: var(--shadow-soft);
+    padding: 20px;
+}
+
+.roster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.roster-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.roster-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lifted);
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    border: none;
+    color: var(--color-secondary);
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.danger {
+    background: transparent;
+    border: 1px solid #d32f2f;
+    color: #d32f2f;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}

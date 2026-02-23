@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORB - Aide & Prise en main</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../style.css">
+    
+    <style>
+        .help-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: var(--color-container);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lifted);
+            border: 1px solid var(--color-border);
+            line-height: 1.6;
+        }
+        
+        .help-container h2 { color: var(--color-text); margin-top: 0; font-family: var(--font-title); letter-spacing: 1px; }
+        .help-container h3 { color: var(--color-primary); margin-top: 30px; border-bottom: 2px solid var(--color-border); padding-bottom: 8px; }
+        .help-container ul { padding-left: 20px; }
+        .help-container li { margin-bottom: 10px; }
+        .help-container strong { color: var(--color-text); }
+        
+        .warning-box {
+            background-color: rgba(249, 171, 0, 0.1);
+            border-left: 4px solid #F9AB00;
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="header-content" style="display: flex; align-items: center; max-width: 1200px; margin: 0 auto; width: 100%;">
+            <a href="../../index.html" style="color: white; text-decoration: none; display: flex; align-items: center; transition: transform 0.2s;">
+                <svg viewBox="0 0 24 24" style="width:28px; height:28px; fill:currentColor; margin-right: 15px;"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>
+            </a>
+            <h1 style="margin: 0; text-align: center; flex-grow: 1; padding-right: 43px;">ORB <span class="highlight">AIDE</span></h1>
+        </div>
+    </header>
+
+    <main class="help-container">
+        <h2>Bienvenue sur ORB Tactical Board</h2>
+        <p>Cet outil est conçu pour vous permettre de créer, sauvegarder et organiser vos schémas tactiques de basketball de la manière la plus intuitive possible. Voici un aperçu de ses fonctionnalités.</p>
+
+        <h3>1. Playbook (L'Éditeur Tactique)</h3>
+        <ul>
+            <li><strong>Création :</strong> Dessinez vos systèmes tactiques à l'aide de la souris ou de votre stylet.</li>
+            <li><strong>Animation :</strong> Vous pouvez animer vos scènes (le ballon suit automatiquement le joueur auquel il est lié).</li>
+            <li><strong>Sauvegarde :</strong> Enregistrez vos systèmes dans la <em>Bibliothèque</em> locale pour ne jamais les perdre.</li>
+        </ul>
+        
+        <h3>2. Bibliothèque & Tags</h3>
+        <ul>
+            <li><strong>Organisation :</strong> Retrouvez tous vos dessins sauvegardés.</li>
+            <li><strong>Catégorisation :</strong> Créez des "Tags" (ex: Pick&Roll, Touche, Défense) et assignez-les à vos playbooks pour les filtrer facilement.</li>
+        </ul>
+
+        <h3>3. Planificateur de Séances</h3>
+        <ul>
+            <li><strong>Assemblage :</strong> Créez des séances d'entraînement complètes en piochant dans votre bibliothèque d'exercices.</li>
+            <li><strong>Exportation :</strong> Exportez vos plans en format PDF pour les emmener avec vous sur le terrain.</li>
+        </ul>
+        
+        <h3>4. Calendrier & Effectif</h3>
+        <ul>
+            <li><strong>Équipes :</strong> Créez vos différentes équipes (U13, U15, Seniors) et ajoutez-y vos joueurs.</li>
+            <li><strong>Planification :</strong> Associez vos plans d'entraînement à des dates précises dans le calendrier.</li>
+            <li><strong>Appel (Présence) :</strong> Faites l'appel à chaque séance pour suivre l'assiduité individuelle de vos joueurs tout au long de la saison.</li>
+        </ul>
+        
+        <div class="warning-box">
+            <h4 style="margin-top: 0; color: #F9AB00;">⚠️ Sécurité de vos données (Sauvegarde)</h4>
+            <p style="margin-bottom: 0;">L'application ORB fonctionne <strong>100% hors-ligne</strong>. Vos données sont stockées uniquement dans la mémoire de votre navigateur. Pensez à utiliser le bouton <strong>"Sauvegarder"</strong> sur l'écran d'accueil régulièrement pour créer un fichier de Backup (format .json) sur votre ordinateur ou téléphone.</p>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+            if (localStorage.getItem('teamMode') === 'crab') document.body.classList.add('crab-mode');
+        });
+    </script>
+</body>
+</html>
